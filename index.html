@@ -142,5 +142,4 @@ function saveSet(){s.notify=document.querySelector('#nt').value;s.max=+document.
 function render(){autoRest();home();cal();history();settings()}
 document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));b.classList.add('on');['home','calendar','history','settings'].forEach(p=>document.querySelector('#'+p).classList.toggle('hide',p!==b.dataset.p))});
 render();
-if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));}
 </script></body></html>
