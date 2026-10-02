@@ -13,7 +13,7 @@
 <script>
 window.addEventListener('error',function(ev){try{var d=document.getElementById('diag');if(d){d.style.display='block';d.textContent='⚠ '+(ev.message||ev.type)+'（'+(ev.lineno||'')+'行目）'}}catch(_){}});
 const K='pillManagerV4';
-const DEFAULT={max:120,rest:4,notify:'21:00',e:{}};
+const DEFAULT={max:120,rest:4,api:'',tok:'',e:{}};
 const MED_RANGES=[
  ['2023-02-16','2023-06-13'],['2023-06-18','2023-09-12'],['2023-09-17','2023-12-25'],
  ['2023-12-30','2024-04-10'],['2024-04-15','2024-08-05'],['2024-08-10','2024-09-24'],
@@ -36,7 +36,7 @@ const store=(()=>{try{localStorage.setItem('__t','1');localStorage.removeItem('_
 let s=null;try{s=JSON.parse(store.get(K)||'null')}catch(e){s=null}
 if(!s||typeof s!=='object')s={...DEFAULT,e:buildHistory()};
 if(!s.e||Object.keys(s.e).length===0)s.e=buildHistory();
-s.max=+s.max||120;s.rest=+s.rest||4;s.notify=s.notify||'21:00';
+s.max=+s.max||120;s.rest=+s.rest||4;s.api=(s.api||'').trim();s.tok=(s.tok||'').trim();if('notify' in s)delete s.notify;
 let cm=new Date();cm.setDate(1);
 const I=isoOf,T=()=>{let d=new Date();d.setHours(0,0,0,0);return d},P=x=>new Date(x+'T00:00:00'),A=(d,n)=>{let x=new Date(d);x.setDate(x.getDate()+n);return x},F=(()=>{const f=new Intl.DateTimeFormat('ja-JP',{year:'numeric',month:'numeric',day:'numeric'});return x=>f.format(P(x))})(),E=x=>s.e[x]||{},save=()=>store.set(K,JSON.stringify(s));
 function set(x,v){let next={...E(x),...v};if(!Object.values(next).some(Boolean))delete s.e[x];else s.e[x]=next;save()}
@@ -100,20 +100,21 @@ function take(){
   const x=I(T()),old=E(x);
   // 服薬を押した瞬間に「服薬1日目」へ反映。出血記録は消さない。
   set(x,{...old,med:true,rest:false,time:new Date().toISOString()});
-  render();toast('今日の服薬を記録しました');
+  render();toast('今日の服薬を記録しました');pushSync([x]);
 }
 function manualRest(){
-  const st=T();
+  const st=T(),ds=[];
   for(let i=0;i<+s.rest;i++){
     const x=I(A(st,i)),old=E(x);
     s.e[x]={...old,med:false,rest:true};
+    ds.push(x);
   }
-  save();render();toast('今日から休薬を開始しました');
+  save();render();toast('今日から休薬を開始しました');pushSync(ds);
 }
 function bleed(){
   const x=I(T()),old=E(x),next=!old.bleed;
   set(x,{...old,bleed:next});
-  autoRest();render();toast(next?'出血を記録しました':'出血記録を解除しました');
+  autoRest();render();toast(next?'出血を記録しました':'出血記録を解除しました');pushSync([x]);
 }
 function home(){
   let [t,n]=status(),x=I(T()),e=E(x),pct=t==='med'?Math.min(100,n/+s.max*100):t==='rest'?n/+s.rest*100:0;
@@ -142,12 +143,83 @@ function cal(){
 }
 function edit(x){let e=E(x);document.querySelector('#modal').innerHTML=`<div class="modal"><div class="sheet"><button class="close" onclick="closeM()">×</button><h2>${F(x)}</h2><button class="btn b" onclick="tog('${x}','med')">服薬 ${e.med?'✓':''}</button><br><br><button class="btn r" onclick="tog('${x}','bleed')">出血 ${e.bleed?'✓':''}</button><br><br><button class="btn g" onclick="tog('${x}','rest')">休薬 ${e.rest?'✓':''}</button><br><br><button class="btn gray" onclick="del('${x}')">この日の記録を削除</button><p class="note">過去の日付も追加・修正・削除できます。</p></div></div>`}
 function closeM(){document.querySelector('#modal').innerHTML=''}
-function tog(x,k){let e=E(x);e[k]=!e[k];if(k==='med'&&e.med){e.rest=false;e.time=new Date().toISOString()}if(k==='rest'&&e.rest)e.med=false;set(x,e);autoRest();closeM();render()}
-function del(x){delete s.e[x];save();closeM();render()}
+function tog(x,k){let e=E(x);e[k]=!e[k];if(k==='med'&&e.med){e.rest=false;e.time=new Date().toISOString()}if(k==='rest'&&e.rest)e.med=false;set(x,e);autoRest();closeM();render();pushSync([x])}
+function del(x){delete s.e[x];save();closeM();render();pushSync([x])}
 function history(){let meds=Object.keys(s.e).filter(x=>E(x).med).sort(),groups=[],cur=null;for(const x of meds){if(!cur||I(A(P(cur.b),1))!==x){if(cur)groups.push(cur);cur={a:x,b:x}}else cur.b=x}if(cur)groups.push(cur);document.querySelector('#history').innerHTML=`<div class="card"><h3>サイクル履歴</h3><div class="list">${groups.length?groups.map((c,i)=>{let rs=Object.keys(s.e).filter(x=>E(x).rest&&x>=I(A(P(c.b),1))).sort();let r1=rs[0],r2=r1?rs[Math.min(+s.rest-1,rs.length-1)]:null;return `<div class="cycle"><b>第${i+1}サイクル</b><p>服薬：${F(c.a)}〜${F(c.b)}（${Math.floor((P(c.b)-P(c.a))/86400000)+1}日）</p><p>休薬：${r1?F(r1)+'〜'+F(r2):'—'}</p></div>`}).join(''):'<p class="note">服薬記録がまだありません。</p>'}</div></div>`}
-function settings(){document.querySelector('#settings').innerHTML=`<div class="card"><h3>設定</h3><label>毎日の服薬通知時間</label><input id="nt" type="time" value="${s.notify}"><h4 style="margin:20px 0 4px">判定ルール</h4><label>連続服薬の上限日数</label><input id="mx" type="number" min="1" max="365" value="${s.max}"><label>休薬日数</label><input id="rs" type="number" min="1" max="14" value="${s.rest}"><div class="rulebox"><p><b>① 連続服薬の上限</b><br>${s.max}日連続で服薬した場合、翌日から${s.rest}日間を休薬とします。</p><p><b>② 3日連続の出血</b><br>出血が3日連続した場合は、${s.max}日の上限よりもこちらを優先し、3日目の翌日から${s.rest}日間を休薬とします。</p><p><b>③ 手動休薬</b><br>ホームの「休薬」を押すと、今日から${s.rest}日間を休薬として記録します。</p></div><button class="btn p" style="margin-top:16px;width:100%" onclick="saveSet()">設定を保存</button><p class="note">初期値：通知21:00／連続服薬120日／休薬4日。データは端末のLocalStorageに保存されます。保存状態：${store.ok?'OK':'保存不可（プライベートブラウズ等）'}／記録日数：${Object.keys(s.e).length}日。</p></div><div class="card"><button class="btn gray" style="width:100%" onclick="if(confirm('全記録を削除しますか？')){s={max:120,rest:4,notify:'21:00',e:{}};save();render()}else{}">全記録を削除</button></div>`}
-function saveSet(){s.notify=document.querySelector('#nt').value;s.max=+document.querySelector('#mx').value||120;s.rest=+document.querySelector('#rs').value||4;save();render();toast('設定を保存しました')}
+function settings(){document.querySelector('#settings').innerHTML=`<div class="card"><h3>設定</h3><h4 style="margin:20px 0 4px">判定ルール</h4><label>連続服薬の上限日数</label><input id="mx" type="number" min="1" max="365" value="${s.max}"><label>休薬日数</label><input id="rs" type="number" min="1" max="14" value="${s.rest}"><div class="rulebox"><p><b>① 連続服薬の上限</b><br>${s.max}日連続で服薬した場合、翌日から${s.rest}日間を休薬とします。</p><p><b>② 3日連続の出血</b><br>出血が3日連続した場合は、${s.max}日の上限よりもこちらを優先し、3日目の翌日から${s.rest}日間を休薬とします。</p><p><b>③ 手動休薬</b><br>ホームの「休薬」を押すと、今日から${s.rest}日間を休薬として記録します。</p></div><button class="btn p" style="margin-top:16px;width:100%" onclick="saveSet()">設定を保存</button><p class="note">初期値：連続服薬120日／休薬4日。データは端末のLocalStorageに保存されます。保存状態：${store.ok?'OK':'保存不可（プライベートブラウズ等）'}／記録日数：${Object.keys(s.e).length}日。</p></div><div class="card"><h3>LINE連携</h3><label>Google Apps Script の Web アプリ URL（/exec）</label><input id="api" type="url" placeholder="https://script.google.com/macros/s/.../exec" value="${s.api}"><label>合言葉（Code.gs の SYNC_TOKEN と同じ文字列）</label><input id="tok" type="text" placeholder="Code.gs 側で決めた文字列" value="${s.tok}"><div class="row" style="margin-top:12px"><button class="btn p" onclick="saveSet()">保存</button><button class="btn b" onclick="pullSync(true)">接続テスト</button></div><button class="btn gray" style="width:100%;margin-top:9px" onclick="pushAllSync()">この端末の記録をサーバーへ送る</button><p class="note" id="syncst">状態：${sync.st}${sync.detail?'（'+esc(sync.detail)+'）':''}${sync.at?'／'+sync.at.toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'}):''}</p><p class="note">LINEで「はい」を押した記録は、この画面を開いたときに自動で取り込みます。「接続テスト」で読み込み直せます。</p></div><div class="card"><button class="btn gray" style="width:100%" onclick="if(confirm('全記録を削除しますか？')){s={max:120,rest:4,api:s.api,tok:s.tok,e:{}};save();render()}else{}">全記録を削除</button></div>`}
+function saveSet(){
+  s.api=(document.querySelector('#api').value||'').trim();
+  s.tok=(document.querySelector('#tok').value||'').trim();
+  s.max=+document.querySelector('#mx').value||120;
+  s.rest=+document.querySelector('#rs').value||4;
+  save();render();toast('設定を保存しました');
+  if(synced())pullSync(true);
+}
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+/* ---------- サーバー同期（Google Apps Script） ---------- */
+let sync={st:'未設定',detail:'',at:null},lastPull=0;
+function synced(){return !!(s.api&&/^https:\/\/script\.google\.com\//.test(s.api))}
+function setSync(st,detail){
+  sync={st:st,detail:detail||'',at:new Date()};
+  const el=document.querySelector('#syncst');
+  if(el)el.textContent='状態：'+st+(sync.detail?'（'+sync.detail+'）':'')+'／'+sync.at.toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
+  else settings();
+}
+function apiGet(p){
+  const q=new URLSearchParams(p);q.set('token',s.tok||'');
+  return fetch(s.api+'?'+q.toString(),{method:'GET',redirect:'follow'})
+   .then(r=>r.text())
+   .then(t=>{let j;try{j=JSON.parse(t)}catch(e){throw new Error('応答がJSONではありません：'+t.slice(0,90))}
+     if(!j.ok)throw new Error(j.error||'サーバーエラー');return j});
+}
+function pullSync(force){
+  if(!synced()){setSync('未設定',s.api?'URLの形式が違います':'URLが未入力');return}
+  if(!force&&Date.now()-lastPull<60000)return;
+  lastPull=Date.now();setSync('同期中…');
+  apiGet({action:'pull'}).then(j=>{
+    if(j.config){if(+j.config.max>0)s.max=+j.config.max;if(+j.config.rest>0)s.rest=+j.config.rest}
+    let n=0;
+    (j.records||[]).forEach(r=>{
+      if(!r||!r.date)return;
+      const o={};if(r.med)o.med=true;if(r.bleed)o.bleed=true;if(r.rest)o.rest=true;if(r.time)o.time=r.time;
+      if(Object.keys(o).length)s.e[r.date]=o;else delete s.e[r.date];
+      n++;
+    });
+    save();render();setSync('接続OK（サーバーから'+n+'件）');
+  }).catch(e=>setSync('エラー',e.message));
+}
+function pushSync(ds){
+  if(!synced()||!ds||!ds.length)return;
+  const payload=ds.map(d=>Object.assign({date:d},s.e[d]||{}));
+  setSync('送信中…');
+  apiGet({action:'push',payload:JSON.stringify(payload),config:JSON.stringify({max:s.max,rest:s.rest})})
+   .then(j=>setSync('送信OK（'+j.applied+'件）'))
+   .catch(e=>setSync('送信エラー',e.message));
+}
+function localDiff(){
+  const base=buildHistory();
+  return Object.keys(s.e).filter(d=>{const a=s.e[d]||{},b=base[d]||{};
+    return (!!a.med!==!!b.med)||(!!a.rest!==!!b.rest)||!!a.bleed}).sort();
+}
+function pushAllSync(){
+  if(!synced()){setSync('未設定',s.api?'URLの形式が違います':'URLが未入力');return}
+  const diff=localDiff();
+  if(!diff.length){setSync('送る記録がありません');return}
+  const chunks=[];for(let i=0;i<diff.length;i+=50)chunks.push(diff.slice(i,i+50));
+  let done=0;
+  const step=()=>{
+    if(!chunks.length){setSync('送信完了（'+diff.length+'日分）');return}
+    const c=chunks.shift();
+    const payload=c.map(d=>Object.assign({date:d},s.e[d]||{}));
+    apiGet({action:'push',payload:JSON.stringify(payload),config:JSON.stringify({max:s.max,rest:s.rest})})
+     .then(()=>{done+=c.length;setSync('送信中…（'+done+'/'+diff.length+'）');step()})
+     .catch(e=>setSync('送信エラー',e.message));
+  };step();
+}
 function render(){autoRest();home();cal();history();settings()}
 document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));b.classList.add('on');['home','calendar','history','settings'].forEach(p=>document.querySelector('#'+p).classList.toggle('hide',p!==b.dataset.p))});
 render();
-</script></body></html>
+if(synced())pullSync(true);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&synced())pullSync(false)});
+</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
+</body></html>
