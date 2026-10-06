@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="服薬管理"><meta name="theme-color" content="#f8f4f8"><title>服薬管理</title><style>
 :root{--bg:#fff5f7;--card:#fff;--tx:#38343a;--muted:#9a7f86;--blue:#dcecff;--green:#dcf3df;--red:#ffdce5;--purple:#f6dff0;--yellow:#fff0f3;--line:#f3dce2}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif}.app{max-width:520px;margin:auto;min-height:100vh;padding-bottom:82px}.head{padding:20px 18px 8px}.head h1{font-size:25px;margin:0}.head p{margin:4px 0;color:var(--muted);font-size:12px}main{padding:8px 15px}.card{background:#fff;border:1px solid var(--line);border-radius:22px;padding:18px;margin-bottom:13px;box-shadow:0 4px 15px #5b46600a}.status{text-align:center;padding:24px}.small{font-size:13px;color:var(--muted)}.big{font-size:31px;font-weight:800;margin:7px}.bar{height:8px;background:#eee9ef;border-radius:8px;overflow:hidden;margin:16px 0 6px}.bar i{display:block;height:100%;background:#ffc0cb}.row{display:flex;gap:9px}.btn{border:0;border-radius:16px;padding:16px 9px;font-weight:750;font-size:15px;flex:1}.b{background:var(--blue);color:#45627a}.r{background:var(--red);color:#a34f69}.g{background:var(--green);color:#4f7658}.p{background:var(--purple);color:#705878}.gray{background:#efecf0;color:#625d65}.summary{display:grid;grid-template-columns:1fr 1fr;gap:9px}.mini{background:#fff8fa;border-radius:15px;padding:13px}.mini span{font-size:11px;color:var(--muted)}.mini b{display:block;margin-top:5px}.plan{background:var(--yellow);color:#76623c}.tabs{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(520px,100%);height:72px;background:#fffffff5;border-top:1px solid var(--line);display:flex;z-index:9}.tab{flex:1;border:0;background:none;color:#99909b;font-size:11px}.tab.on{color:#d77f91;font-weight:800}.tab strong{display:block;font-size:21px;margin-bottom:2px}.hide{display:none}.month{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px;min-height:52px}
 .month>*:not(button){flex:1;text-align:center;font-weight:800;font-size:17px}.nav{min-width:52px;min-height:52px;padding:0 14px;font-size:26px;font-weight:800;line-height:1;display:inline-flex;align-items:center;justify-content:center;border:0;background:#ffe8ee;border-radius:15px;color:#b5627a;touch-action:manipulation;-webkit-tap-highlight-color:transparent;cursor:pointer;box-shadow:0 2px 6px #5b46600f;transition:transform .06s,background .12s}
-.nav:active{background:#ffd0e0;transform:scale(.92);box-shadow:none}.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}.dow{text-align:center;color:var(--muted);font-size:10px;padding:4px}.day{min-height:63px;border:1px solid var(--line);background:#fff;border-radius:10px;padding:4px;font-size:11px;text-align:left}.today{outline:2px solid #ffc0cb}.planned{background:#fffaf0;border:1px dashed #d8c38c}.mark{font-size:14px;margin-top:4px;line-height:1.15}.legend{display:flex;gap:10px;flex-wrap:wrap;font-size:11px;color:var(--muted);margin-top:10px}.list{display:grid;gap:9px}.cycle{border:1px solid var(--line);border-radius:16px;padding:14px}.cycle b{display:block;margin-bottom:6px}.cycle p{font-size:12px;margin:4px;color:#655f67}label{display:block;color:var(--muted);font-size:12px;margin:12px 0 5px}input{width:100%;padding:12px;border:1px solid #efcfd8;border-radius:12px;font-size:16px}.note{font-size:11px;line-height:1.6;color:var(--muted)}.rulebox{background:#fff3f6;border-radius:16px;padding:12px 14px;margin-top:14px}.rulebox p{font-size:12px;line-height:1.7;margin:0 0 10px}.rulebox p:last-child{margin-bottom:0}.modal{position:fixed;inset:0;background:#2d253355;display:flex;align-items:flex-end;z-index:20}.sheet{background:#fff;width:min(520px,100%);border-radius:25px 25px 0 0;padding:20px}.sheet h2{margin-top:0}.close{float:right;border:0;border-radius:50%;width:34px;height:34px}.toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:#39343b;color:white;padding:10px 15px;border-radius:99px;font-size:12px;z-index:30}
+.nav:active{background:#ffd0e0;transform:scale(.92);box-shadow:none}.today-btn{width:100%;min-height:44px;margin:-2px 0 12px;border:0;border-radius:14px;background:#ffe8ee;color:#b5627a;font-weight:800;font-size:14px;touch-action:manipulation;-webkit-tap-highlight-color:transparent}.today-btn:active{background:#ffd0e0}.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}.dow{text-align:center;color:var(--muted);font-size:10px;padding:4px}.day{min-height:63px;border:1px solid var(--line);background:#fff;border-radius:10px;padding:4px;font-size:11px;text-align:left}.today{outline:2px solid #ffc0cb}.planned{background:#fffaf0;border:1px dashed #d8c38c}.mark{font-size:14px;margin-top:4px;line-height:1.15}.legend{display:flex;gap:10px;flex-wrap:wrap;font-size:11px;color:var(--muted);margin-top:10px}.list{display:grid;gap:9px}.cycle{border:1px solid var(--line);border-radius:16px;padding:14px}.cycle b{display:block;margin-bottom:6px}.cycle p{font-size:12px;margin:4px;color:#655f67}label{display:block;color:var(--muted);font-size:12px;margin:12px 0 5px}input{width:100%;padding:12px;border:1px solid #efcfd8;border-radius:12px;font-size:16px}.note{font-size:11px;line-height:1.6;color:var(--muted)}.rulebox{background:#fff3f6;border-radius:16px;padding:12px 14px;margin-top:14px}.rulebox p{font-size:12px;line-height:1.7;margin:0 0 10px}.rulebox p:last-child{margin-bottom:0}.modal{position:fixed;inset:0;background:#2d253355;display:flex;align-items:flex-end;z-index:20}.sheet{background:#fff;width:min(520px,100%);border-radius:25px 25px 0 0;padding:20px}.sheet h2{margin-top:0}.close{float:right;border:0;border-radius:50%;width:34px;height:34px}.toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:#39343b;color:white;padding:10px 15px;border-radius:99px;font-size:12px;z-index:30}
 .diag{display:none;position:fixed;left:8px;right:8px;bottom:84px;background:#fff3cd;color:#7a5b12;border:1px solid #f0dca0;border-radius:12px;padding:10px;font-size:12px;line-height:1.5;z-index:20;word-break:break-all}</style></head><body><div class="app"><header class="head"><h1>服薬管理</h1></header><main id="home"></main><main id="calendar" class="hide"></main><main id="history" class="hide"></main><main id="settings" class="hide"></main><nav class="tabs"><button class="tab on" data-p="home"><strong>⌂</strong>ホーム</button><button class="tab" data-p="calendar"><strong>▦</strong>カレンダー</button><button class="tab" data-p="history"><strong>☷</strong>一覧</button><button class="tab" data-p="settings"><strong>⚙</strong>設定</button></nav></div><div id="modal"></div><div id="diag" class="diag"></div>
 <script>
 window.addEventListener('error',function(ev){try{var d=document.getElementById('diag');if(d){d.style.display='block';d.textContent='⚠ '+(ev.message||ev.type)+'（'+(ev.lineno||'')+'行目）'}}catch(_){}});
@@ -141,18 +141,71 @@ function cal(){
     let marks=(e.med?'💊':'')+(e.rest?'🌱':'')+(e.bleed?'🌷':'')+(isPlan?'🌱':'');
     h+=`<button class="day ${x===I(T())?'today':''} ${isPlan?'planned':''}" onclick="edit('${x}')"><b>${d}</b><div class="mark">${marks||' '}</div>${isPlan?'<div style="font-size:9px;color:#8b7545">休薬予定</div>':''}</button>`
   }
-  document.querySelector('#calendar').innerHTML=`<div class="card"><div class="month"><button class="nav" onclick="cm.setMonth(cm.getMonth()-1);render()">‹</button><b>${y}年${m+1}月</b><button class="nav" onclick="cm.setMonth(cm.getMonth()+1);render()">›</button></div><div class="cal">${h}</div><div class="legend"><span>💊服薬</span><span>🌱休薬</span><span>🌷出血</span></div><p class="note">3日連続出血、または${s.max}日連続服薬が成立すると、翌日から${s.rest}日間が自動的に休薬表示になります。休薬は🌱、出血は🌷で表示します。日付をタップすると修正できます。</p></div>`
+  document.querySelector('#calendar').innerHTML=`<div class="card"><div class="month"><button class="nav" onclick="shiftMonth(-1)">‹</button><b>${y}年${m+1}月</b><button class="nav" onclick="shiftMonth(1)">›</button></div><button class="today-btn" onclick="goToday()">${(y===T().getFullYear()&&m===T().getMonth())?'今日を表示中':'⌂ 今日に戻る'}</button><div class="cal">${h}</div><div class="legend"><span>💊服薬</span><span>🌱休薬</span><span>🌷出血</span></div><p class="note">3日連続出血、または${s.max}日連続服薬が成立すると、翌日から${s.rest}日間が自動的に休薬表示になります。休薬は🌱、出血は🌷で表示します。日付をタップすると修正できます。左右にスワイプすると前後の月に移動できます。</p></div>`
 }
 function edit(x){let e=E(x);document.querySelector('#modal').innerHTML=`<div class="modal"><div class="sheet"><button class="close" onclick="closeM()">×</button><h2>${F(x)}</h2><button class="btn b" onclick="tog('${x}','med')">服薬 ${e.med?'✓':''}</button><br><br><button class="btn r" onclick="tog('${x}','bleed')">出血 ${e.bleed?'✓':''}</button><br><br><button class="btn g" onclick="tog('${x}','rest')">休薬 ${e.rest?'✓':''}</button><br><br><button class="btn gray" onclick="del('${x}')">この日の記録を削除</button><p class="note">過去の日付も追加・修正・削除できます。</p></div></div>`}
 function closeM(){document.querySelector('#modal').innerHTML=''}
 function tog(x,k){let e=E(x);e[k]=!e[k];if(k==='med'&&e.med){e.rest=false;e.time=new Date().toISOString()}if(k==='rest'&&e.rest)e.med=false;set(x,e);autoRest();closeM();render()}
 function del(x){delete s.e[x];save();closeM();render()}
 function history(){let meds=Object.keys(s.e).filter(x=>E(x).med).sort(),groups=[],cur=null;for(const x of meds){if(!cur||I(A(P(cur.b),1))!==x){if(cur)groups.push(cur);cur={a:x,b:x}}else cur.b=x}if(cur)groups.push(cur);document.querySelector('#history').innerHTML=`<div class="card"><h3>サイクル履歴</h3><div class="list">${groups.length?groups.map((c,i)=>{let rs=Object.keys(s.e).filter(x=>E(x).rest&&x>=I(A(P(c.b),1))).sort();let r1=rs[0],r2=r1?rs[Math.min(+s.rest-1,rs.length-1)]:null;return `<div class="cycle"><b>第${i+1}サイクル</b><p>服薬：${F(c.a)}〜${F(c.b)}（${Math.floor((P(c.b)-P(c.a))/86400000)+1}日）</p><p>休薬：${r1?F(r1)+'〜'+F(r2):'—'}</p></div>`}).join(''):'<p class="note">服薬記録がまだありません。</p>'}</div></div>`}
-function settings(){document.querySelector('#settings').innerHTML=`<div class="card"><h3>設定</h3><h4 style="margin:20px 0 4px">判定ルール</h4><label>連続服薬の上限日数</label><input id="mx" type="number" min="1" max="365" value="${s.max}"><label>休薬日数</label><input id="rs" type="number" min="1" max="14" value="${s.rest}"><div class="rulebox"><p><b>① 連続服薬の上限</b><br>${s.max}日連続で服薬した場合、翌日から${s.rest}日間を休薬とします。</p><p><b>② 3日連続の出血</b><br>出血が3日連続した場合は、${s.max}日の上限よりもこちらを優先し、3日目の翌日から${s.rest}日間を休薬とします。</p><p><b>③ 手動休薬</b><br>ホームの「休薬」を押すと、今日から${s.rest}日間を休薬として記録します。</p></div><button class="btn p" style="margin-top:16px;width:100%" onclick="saveSet()">設定を保存</button><p class="note">初期値：連続服薬120日／休薬4日。データは端末のLocalStorageに保存されます。保存状態：${store.ok?'OK':'保存不可（プライベートブラウズ等）'}／記録日数：${Object.keys(s.e).length}日。</p></div><div class="card"><button class="btn gray" style="width:100%" onclick="if(confirm('全記録を削除しますか？')){s={max:120,rest:4,api:s.api,tok:s.tok,e:{}};save();render()}else{}">全記録を削除</button></div>`}
+function settings(){document.querySelector('#settings').innerHTML=`<div class="card"><h3>設定</h3><h4 style="margin:20px 0 4px">判定ルール</h4><label>連続服薬の上限日数</label><input id="mx" type="number" min="1" max="365" value="${s.max}"><label>休薬日数</label><input id="rs" type="number" min="1" max="14" value="${s.rest}"><div class="rulebox"><p><b>① 連続服薬の上限</b><br>${s.max}日連続で服薬した場合、翌日から${s.rest}日間を休薬とします。</p><p><b>② 3日連続の出血</b><br>出血が3日連続した場合は、${s.max}日の上限よりもこちらを優先し、3日目の翌日から${s.rest}日間を休薬とします。</p><p><b>③ 手動休薬</b><br>ホームの「休薬」を押すと、今日から${s.rest}日間を休薬として記録します。</p></div><button class="btn p" style="margin-top:16px;width:100%" onclick="saveSet()">設定を保存</button><p class="note">初期値：連続服薬120日／休薬4日。データは端末のLocalStorageに保存されます。保存状態：${store.ok?'OK':'保存不可（プライベートブラウズ等）'}／記録日数：${Object.keys(s.e).length}日。</p></div><div class="card"><h3>記録のバックアップ</h3><p class="note" style="margin-top:0">記録を1つのファイルに書き出します。機種変更や引っ越しのときに、新しい端末で「ファイルから復元」を選んでください。</p><div class="row"><button class="btn g" onclick="expJSON()">ファイルに書き出す</button><button class="btn b" onclick="document.querySelector('#imp').click()">ファイルから復元</button></div><input id="imp" type="file" accept=".json,application/json" style="display:none" onchange="impJSON(this)"><p class="note">iPhoneでは書き出したファイルは「ファイル」アプリに保存されます。復元は今の記録を置き換えるので、実行前に確認画面が出ます。</p></div><div class="card"><button class="btn gray" style="width:100%" onclick="if(confirm('全記録を削除しますか？')){s={max:120,rest:4,api:s.api,tok:s.tok,e:{}};save();render()}else{}">全記録を削除</button></div>`}
 function saveSet(){
   s.max=+document.querySelector('#mx').value||120;
   s.rest=+document.querySelector('#rs').value||4;
   save();render();toast('設定を保存しました');
+}
+/* ---------- 月の移動と「今日に戻る」 ---------- */
+function shiftMonth(n){cm.setMonth(cm.getMonth()+n);render()}
+function goToday(){cm=T();cm.setDate(1);render();toast('今月を表示しました')}
+/* カレンダーを左右にスワイプして月を移動（縦スクロールは邪魔しない） */
+(function(){
+  const el=document.querySelector('#calendar');
+  if(!el)return;
+  let sx=0,sy=0,st=0,on=false;
+  el.addEventListener('touchstart',e=>{
+    if(e.touches.length!==1){on=false;return}
+    const t=e.touches[0];sx=t.clientX;sy=t.clientY;st=Date.now();on=true;
+  },{passive:true});
+  el.addEventListener('touchend',e=>{
+    if(!on)return;on=false;
+    const t=e.changedTouches&&e.changedTouches[0];if(!t)return;
+    const dx=t.clientX-sx,dy=t.clientY-sy,dt=Date.now()-st;
+    if(dt>1200||Math.abs(dx)<50||Math.abs(dx)<Math.abs(dy)*1.5)return;  // 長押し・縦スクロールは無視
+    shiftMonth(dx<0?1:-1);
+  },{passive:true});
+})();
+/* ---------- 記録のバックアップ（書き出し／読み込み） ---------- */
+function expJSON(){
+  const data={app:'pillManager',version:4,exportedAt:new Date().toISOString(),max:s.max,rest:s.rest,records:s.e};
+  const name='服薬管理_'+I(T())+'.json';
+  try{
+    const blob=new Blob([JSON.stringify(data,null,1)],{type:'application/json'});
+    const url=URL.createObjectURL(blob),a=document.createElement('a');
+    a.href=url;a.download=name;document.body.appendChild(a);a.click();
+    setTimeout(()=>{URL.revokeObjectURL(url);a.remove()},1000);
+    toast('ファイルに保存しました');
+  }catch(err){toast('保存できませんでした：'+err.message)}
+}
+function impJSON(inp){
+  const f=inp.files&&inp.files[0];if(!f){return}
+  const r=new FileReader();
+  r.onload=()=>{
+    let d=null;
+    try{d=JSON.parse(r.result)}catch(err){toast('読み込めません（形式が違います）');inp.value='';return}
+    const rec=d&&(d.records||d.e);
+    if(!rec||typeof rec!=='object'){toast('記録が見つかりません');inp.value='';return}
+    const clean={};
+    for(const k in rec){if(/^\d{4}-\d{2}-\d{2}$/.test(k)&&rec[k]&&typeof rec[k]==='object')clean[k]=rec[k]}
+    const n=Object.keys(clean).length;
+    if(!n){toast('記録が見つかりません');inp.value='';return}
+    if(!confirm('このファイルの記録 '+n+'日分で置き換えます。\nこの端末の今の記録（'+Object.keys(s.e).length+'日分）は上書きされます。よろしいですか？')){inp.value='';return}
+    s.e=clean;
+    if(+d.max>0)s.max=+d.max;
+    if(+d.rest>0)s.rest=+d.rest;
+    save();render();toast(n+'日分の記録を復元しました');inp.value='';
+  };
+  r.onerror=()=>{toast('ファイルを開けませんでした');inp.value=''};
+  r.readAsText(f);
 }
 function render(){autoRest();home();cal();history();settings()}
 document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));b.classList.add('on');['home','calendar','history','settings'].forEach(p=>document.querySelector('#'+p).classList.toggle('hide',p!==b.dataset.p))});
