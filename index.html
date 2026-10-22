@@ -10,12 +10,12 @@
 <meta name="apple-mobile-web-app-title" content="服薬管理"><meta name="theme-color" content="#f8f4f8"><title>服薬管理</title><style>
 :root{--bg:#fff5f7;--card:#fff;--tx:#38343a;--muted:#9a7f86;--blue:#dcecff;--green:#dcf3df;--red:#ffdce5;--purple:#f6dff0;--yellow:#fff0f3;--line:#f3dce2}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif}.app{max-width:520px;margin:auto;min-height:100vh;padding-bottom:82px}.head{padding:20px 18px 8px}.head h1{font-size:25px;margin:0}.head p{margin:4px 0;color:var(--muted);font-size:12px}main{padding:8px 15px}.card{background:#fff;border:1px solid var(--line);border-radius:22px;padding:18px;margin-bottom:13px;box-shadow:0 4px 15px #5b46600a}.status{text-align:center;padding:24px}.small{font-size:13px;color:var(--muted)}.big{font-size:31px;font-weight:800;margin:7px}.bar{height:8px;background:#eee9ef;border-radius:8px;overflow:hidden;margin:16px 0 6px}.bar i{display:block;height:100%;background:#ffc0cb}.row{display:flex;gap:9px}.btn{border:0;border-radius:16px;padding:16px 9px;font-weight:750;font-size:15px;flex:1}.b{background:var(--blue);color:#45627a}.r{background:var(--red);color:#a34f69}.g{background:var(--green);color:#4f7658}.p{background:var(--purple);color:#705878}.gray{background:#efecf0;color:#625d65}.summary{display:grid;grid-template-columns:1fr 1fr;gap:9px}.mini{background:#fff8fa;border-radius:15px;padding:13px}.mini span{font-size:11px;color:var(--muted)}.mini b{display:block;margin-top:5px}.plan{background:var(--yellow);color:#76623c}.tabs{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(520px,100%);height:72px;background:#fffffff5;border-top:1px solid var(--line);display:flex;z-index:9}.tab{flex:1;border:0;background:none;color:#99909b;font-size:11px}.tab.on{color:#d77f91;font-weight:800}.tab strong{display:block;font-size:21px;margin-bottom:2px}.hide{display:none}.month{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px;min-height:52px}
 .month>*:not(button){flex:1;text-align:center;font-weight:800;font-size:17px}.nav{min-width:52px;min-height:52px;padding:0 14px;font-size:26px;font-weight:800;line-height:1;display:inline-flex;align-items:center;justify-content:center;border:0;background:#ffe8ee;border-radius:15px;color:#b5627a;touch-action:manipulation;-webkit-tap-highlight-color:transparent;cursor:pointer;box-shadow:0 2px 6px #5b46600f;transition:transform .06s,background .12s}
-.nav:active{background:#ffd0e0;transform:scale(.92);box-shadow:none}.today-btn{width:100%;min-height:44px;margin:-2px 0 12px;border:0;border-radius:14px;background:#ffe8ee;color:#b5627a;font-weight:800;font-size:14px;touch-action:manipulation;-webkit-tap-highlight-color:transparent}.today-btn:active{background:#ffd0e0}.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}.dow{text-align:center;color:var(--muted);font-size:10px;padding:4px}.day{min-height:63px;border:1px solid var(--line);background:#fff;border-radius:10px;padding:4px;font-size:11px;text-align:left}.today{outline:2px solid #ffc0cb}.planned{background:#fffaf0;border:1px dashed #d8c38c}.mark{font-size:14px;margin-top:4px;line-height:1.15}.legend{display:flex;gap:10px;flex-wrap:wrap;font-size:11px;color:var(--muted);margin-top:10px}.list{display:grid;gap:9px}.cycle{border:1px solid var(--line);border-radius:16px;padding:14px}.cycle b{display:block;margin-bottom:6px}.cycle p{font-size:12px;margin:4px;color:#655f67}label{display:block;color:var(--muted);font-size:12px;margin:12px 0 5px}input{width:100%;padding:12px;border:1px solid #efcfd8;border-radius:12px;font-size:16px}.note{font-size:11px;line-height:1.6;color:var(--muted)}.rulebox{background:#fff3f6;border-radius:16px;padding:12px 14px;margin-top:14px}.rulebox p{font-size:12px;line-height:1.7;margin:0 0 10px}.rulebox p:last-child{margin-bottom:0}.modal{position:fixed;inset:0;background:#2d253355;display:flex;align-items:flex-end;z-index:20}.sheet{background:#fff;width:min(520px,100%);border-radius:25px 25px 0 0;padding:20px}.sheet h2{margin-top:0}.close{float:right;border:0;border-radius:50%;width:34px;height:34px}.toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:#39343b;color:white;padding:10px 15px;border-radius:99px;font-size:12px;z-index:30}
+.nav:active{background:#ffd0e0;transform:scale(.92);box-shadow:none}.today-btn{width:100%;min-height:44px;margin:-2px 0 12px;border:0;border-radius:14px;background:#ffe8ee;color:#b5627a;font-weight:800;font-size:14px;touch-action:manipulation;-webkit-tap-highlight-color:transparent}.today-btn:active{background:#ffd0e0}.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}.dow{text-align:center;color:var(--muted);font-size:10px;padding:4px}.day{min-height:63px;border:1px solid var(--line);background:#fff;border-radius:10px;padding:4px;font-size:11px;text-align:left}.today{outline:2px solid #ffc0cb}.exam-period{background:#eef4ff;border-color:#cfe0f5}.exam-day{border:2px solid #6f9bd1;background:#dfeaff}.planned{background:#fffaf0;border:1px dashed #d8c38c}.mark{font-size:14px;margin-top:4px;line-height:1.15}.legend{display:flex;gap:10px;flex-wrap:wrap;font-size:11px;color:var(--muted);margin-top:10px}.list{display:grid;gap:9px}.cycle{border:1px solid var(--line);border-radius:16px;padding:14px}.cycle b{display:block;margin-bottom:6px}.cycle p{font-size:12px;margin:4px;color:#655f67}label{display:block;color:var(--muted);font-size:12px;margin:12px 0 5px}input{width:100%;padding:12px;border:1px solid #efcfd8;border-radius:12px;font-size:16px}.note{font-size:11px;line-height:1.6;color:var(--muted)}.rulebox{background:#fff3f6;border-radius:16px;padding:12px 14px;margin-top:14px}.rulebox p{font-size:12px;line-height:1.7;margin:0 0 10px}.rulebox p:last-child{margin-bottom:0}.modal{position:fixed;inset:0;background:#2d253355;display:flex;align-items:flex-end;z-index:20}.sheet{background:#fff;width:min(520px,100%);border-radius:25px 25px 0 0;padding:20px}.sheet h2{margin-top:0}.close{float:right;border:0;border-radius:50%;width:34px;height:34px}.toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:#39343b;color:white;padding:10px 15px;border-radius:99px;font-size:12px;z-index:30}
 .diag{display:none;position:fixed;left:8px;right:8px;bottom:84px;background:#fff3cd;color:#7a5b12;border:1px solid #f0dca0;border-radius:12px;padding:10px;font-size:12px;line-height:1.5;z-index:20;word-break:break-all}</style></head><body><div class="app"><header class="head"><h1>服薬管理</h1></header><main id="home"></main><main id="calendar" class="hide"></main><main id="history" class="hide"></main><main id="settings" class="hide"></main><nav class="tabs"><button class="tab on" data-p="home"><strong>⌂</strong>ホーム</button><button class="tab" data-p="calendar"><strong>▦</strong>カレンダー</button><button class="tab" data-p="history"><strong>☷</strong>一覧</button><button class="tab" data-p="settings"><strong>⚙</strong>設定</button></nav></div><div id="modal"></div><div id="diag" class="diag"></div>
 <script>
 window.addEventListener('error',function(ev){try{var d=document.getElementById('diag');if(d){d.style.display='block';d.textContent='⚠ '+(ev.message||ev.type)+'（'+(ev.lineno||'')+'行目）'}}catch(_){}});
 const K='pillManagerV4';
-const DEFAULT={max:120,rest:4,e:{}};
+const DEFAULT={max:120,rest:4,sheetDays:24,sheets:3,sheetBase:3,sheetStart:'2026-10-08',exam:'',e:{}};
 const MED_RANGES=[
  ['2023-02-16','2023-06-13'],['2023-06-18','2023-09-12'],['2023-09-17','2023-12-25'],
  ['2023-12-30','2024-04-10'],['2024-04-15','2024-08-05'],['2024-08-10','2024-09-24'],
@@ -38,7 +38,10 @@ const store=(()=>{try{localStorage.setItem('__t','1');localStorage.removeItem('_
 let s=null;try{s=JSON.parse(store.get(K)||'null')}catch(e){s=null}
 if(!s||typeof s!=='object')s={...DEFAULT,e:buildHistory()};
 if(!s.e||Object.keys(s.e).length===0)s.e=buildHistory();
-s.max=+s.max||120;s.rest=+s.rest||4;if('notify' in s)delete s.notify;if('api' in s)delete s.api;if('tok' in s)delete s.tok;
+s.max=+s.max||120;s.rest=+s.rest||4;s.sheetDays=+s.sheetDays||24;s.sheets=+s.sheets||3;s.sheetBase=+s.sheetBase||3;
+if(!s.sheetStart)s.sheetStart='2026-10-08';
+if(typeof s.exam!=='string')s.exam=isoOf(s.exam||'');
+if('notify' in s)delete s.notify;if('api' in s)delete s.api;if('tok' in s)delete s.tok;
 let cm=new Date();cm.setDate(1);
 const I=isoOf,T=()=>{let d=new Date();d.setHours(0,0,0,0);return d},P=x=>new Date(x+'T00:00:00'),A=(d,n)=>{let x=new Date(d);x.setDate(x.getDate()+n);return x},F=(()=>{const f=new Intl.DateTimeFormat('ja-JP',{year:'numeric',month:'numeric',day:'numeric'});return x=>f.format(P(x))})(),E=x=>s.e[x]||{},save=()=>store.set(K,JSON.stringify(s));
 function set(x,v){let next={...E(x),...v};if(!Object.values(next).some(Boolean))delete s.e[x];else s.e[x]=next;save()}
@@ -91,6 +94,49 @@ function autoRest(){
   }
   if(changed)save();
 }
+
+/* ===== シート（24日／3シート）と診察のめやす ===== */
+function sheetInfo(){
+  const conf={days:+s.sheetDays||24,n:+s.sheets||3,start:s.sheetStart||'2026-10-08'};
+  const start=P(conf.start);
+  // 起点から「24錠 + その後の休薬」を積み上げて、各シートの範囲を作る
+  let cur=start,sheets=[],cursor=start;
+  for(let i=0;i<conf.n;i++){
+    const a=I(cursor),b=I(A(cursor,conf.days-1));
+    // そのシート終了後に実際に休薬が入っていれば、その分だけ次のシートをずらす
+    let gap=0,d=A(cursor,conf.days);
+    for(let g=0;g<+s.rest;g++){ if(E(I(A(d,g))).rest)gap=g+1; else break; }
+    sheets.push({no:i+1,a,b,gap:gap});
+    cursor=A(d,gap);
+  }
+  // 飲み終えたシート数＝最終服薬日を含むシートまで
+  // いま何錠目か：記録があれば数える。記録が無い期間ならシート開始日からの経過日数で代用。
+  const today0=I(T());
+  const cnt=(a,b)=>{let n=0;for(let d=P(a);d<=P(b);d=A(d,1))if(E(I(d)).med)n++;return n};
+  let taken=cnt(sheets[0].a,today0);
+  if(!taken)taken=Math.round((T()-P(sheets[0].a))/86400000)+1;
+  taken=Math.max(1,Math.min(conf.days,taken));
+  const idx=Math.min(Math.floor((taken-1)/conf.days),sheets.length-1);
+  const remain=Math.max(0,conf.days-taken);
+  const rawSh=sheets[idx];
+  const sh=rawSh||{no:1,a:conf.start,b:conf.start,gap:0};
+  const last=sh.gap?I(A(P(sh.b),sh.gap)):sh.b;      // 休薬込みの見込み最終服薬日（=予定の最終日）
+  const periodStart=I(A(P(sh.b),-(Math.min(10,conf.days)-1)));  // 最後の10日間
+  const periodEnd=sh.b;
+  const today=I(T());
+  const inPeriod=today>=periodStart&&today<=periodEnd;
+  const afterPeriod=today>periodEnd;
+  const lastWeekday=weekdayOnOrBefore(periodEnd);
+  const exam=s.exam||'';
+  let daysToExam=null;
+  if(exam)daysToExam=Math.round((P(exam)-T())/86400000);
+  return {conf,sheets,idx,taken,remain,sh,last,periodStart,periodEnd,inPeriod,afterPeriod,lastWeekday,exam,daysToExam,
+    no:(+s.sheetBase||1)-1+sh.no,afterRest:sh.gap?{a:I(A(P(sh.b),1)),b:I(A(P(sh.b),sh.gap))}:null};
+}
+function weekdayOnOrBefore(x){let d=P(x);while([0,6].includes(d.getDay()))d=A(d,-1);return I(d)}
+const W=['日','月','火','水','木','金','土'];
+function wd(x){return W[P(x).getDay()]}
+
 function status(){
   const x=I(T()),e=E(x);
   if(e.rest){return ['rest',restRun(x)]}
@@ -129,6 +175,26 @@ function home(){
   document.querySelector('#home').innerHTML=`
   <div class="card status"><div class="small">${t==='rest'?'現在は休薬期間':t==='med'?'現在は服薬期間':'記録待ち'}</div><div class="big">${t==='rest'?`休薬 ${n}日目`:t==='med'?`連続服薬 ${n}日目`:'服薬開始前'}</div><div class="small">${F(x)}</div><div class="bar"><i style="width:${pct}%"></i></div><div class="note">${t==='rest'?`あと${Math.max(0,+s.rest-n)}日で服薬再開`:`上限 ${s.max}日まであと${Math.max(0,+s.max-n)}日`}</div></div>
   <div class="card"><div class="row"><button class="btn b" onclick="take()">💊 服薬${e.med?' ✓':''}</button><button class="btn g" onclick="manualRest()">🌱 休薬</button><button class="btn r" onclick="bleed()">🌷${e.bleed?' ✓':''}</button></div><div class="note" style="margin-top:9px">${e.time?'服薬時刻：'+new Date(e.time).toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'}):'「服薬」を押すと、今日の服薬としてすぐに記録されます。'}</div></div>
+
+  ${(()=>{const S=sheetInfo();
+    let st,colour,main,sub;
+    if(S.exam){
+      const d=S.daysToExam;
+      main=`診察予定 ${F(S.exam)}（${wd(S.exam)}）`;
+      sub=d>0?`あと${d}日`:(d===0?'今日です':`${-d}日過ぎています`);
+      colour=d<0?'#ffe1e6':(d<=2?'#fff3d6':'#eef7ee');
+    }else{
+      main='予定（未定）';sub='カレンダーの日付をタップして「診察」を選ぶと登録できます';
+      colour='#fff8fa';
+    }
+    const pr=S.afterPeriod?'診察期間が終了しました':(S.inPeriod?'診察期間中':'まだ診察期間の前です');
+    return `<div class="card" style="background:${colour}">
+      <h3>🏥 診察のめやす</h3>
+      <p style="margin:8px 0 4px;font-size:15px"><b>シート ${S.no}／${S.conf.n}</b> ・ ${S.conf.days}錠中 ${S.taken}錠目（残り ${S.remain}錠）</p>
+      <p style="margin:4px 0;font-size:13px">診察期間 ${F(S.periodStart)} 〜 ${F(S.periodEnd)}</p>
+      <p style="margin:4px 0;font-size:13px">［${main}・${sub}］</p>
+      <div class="note" style="margin-top:8px">${pr}／最終服薬日は ${F(S.last)}（${wd(S.last)}）の見込み。${S.lastWeekday!==S.periodEnd?`薬が切れる前に 平日の ${F(S.lastWeekday)} が実質の期限です。`:''}</div>
+    </div>`})()}
   <div class="card"><div class="summary"><div class="mini"><span>次の休薬予定</span><b>${next}</b></div><div class="mini"><span>過去3日間の出血</span><b>${b}日</b></div></div>${ps?`<p class="note" style="margin-top:10px">📅 カレンダーでは、次の休薬${F(ps)}〜${F(I(A(P(ps),+s.rest-1)))}を予定として表示しています。</p>`:''}</div>
 `
 }
@@ -136,19 +202,35 @@ function cal(){
   let y=cm.getFullYear(),m=cm.getMonth(),f=new Date(y,m,1),days=new Date(y,m+1,0).getDate(),w=f.getDay(),planned=projectedRestDates(),h='';
   for(let q of ['日','月','火','水','木','金','土'])h+=`<div class="dow">${q}</div>`;
   for(let i=0;i<w;i++)h+='<div></div>';
+  const S=sheetInfo();
   for(let d=1;d<=days;d++){
     let x=I(new Date(y,m,d)),e=E(x),isPlan=planned.has(x)&&!e.rest;
-    let marks=(e.med?'💊':'')+(e.rest?'🌱':'')+(e.bleed?'🌷':'')+(isPlan?'🌱':'');
-    h+=`<button class="day ${x===I(T())?'today':''} ${isPlan?'planned':''}" onclick="edit('${x}')"><b>${d}</b><div class="mark">${marks||' '}</div>${isPlan?'<div style="font-size:9px;color:#8b7545">休薬予定</div>':''}</button>`
+    const inPeriod=x>=S.periodStart&&x<=S.periodEnd,isExam=(s.exam===x);
+    let marks=(e.med?'💊':'')+(e.rest?'🌱':'')+(e.bleed?'🌷':'')+(isPlan?'🌱':'')+(isExam?'🏥':'');
+    h+=`<button class="day ${x===I(T())?'today':''} ${isPlan?'planned':''} ${inPeriod?'exam-period':''} ${isExam?'exam-day':''}" onclick="edit('${x}')"><b>${d}</b><div class="mark">${marks||' '}</div>${isPlan?'<div style="font-size:9px;color:#8b7545">休薬予定</div>':''}${inPeriod&&d===P(S.periodStart).getDate()?'<div style="font-size:8px;color:#4a6b96;font-weight:700">診察期間</div>':''}</button>`
   }
-  document.querySelector('#calendar').innerHTML=`<div class="card"><div class="month"><button class="nav" onclick="shiftMonth(-1)">‹</button><b>${y}年${m+1}月</b><button class="nav" onclick="shiftMonth(1)">›</button></div><button class="today-btn" onclick="goToday()">${(y===T().getFullYear()&&m===T().getMonth())?'今日を表示中':'⌂ 今日に戻る'}</button><div class="cal">${h}</div><div class="legend"><span>💊服薬</span><span>🌱休薬</span><span>🌷出血</span></div><p class="note">3日連続出血、または${s.max}日連続服薬が成立すると、翌日から${s.rest}日間が自動的に休薬表示になります。休薬は🌱、出血は🌷で表示します。日付をタップすると修正できます。左右にスワイプすると前後の月に移動できます。</p></div>`
+  document.querySelector('#calendar').innerHTML=`<div class="card"><div class="month"><button class="nav" onclick="shiftMonth(-1)">‹</button><b>${y}年${m+1}月</b><button class="nav" onclick="shiftMonth(1)">›</button></div><button class="today-btn" onclick="goToday()">${(y===T().getFullYear()&&m===T().getMonth())?'今日を表示中':'⌂ 今日に戻る'}</button><div class="cal">${h}</div><div class="legend"><span>💊服薬</span><span>🌱休薬</span><span>🌷出血</span><span>🏥診察予定</span><span style="background:#eef4ff;padding:1px 5px;border-radius:5px">◻診察期間</span></div><p class="note">3日連続出血、または${s.max}日連続服薬が成立すると、翌日から${s.rest}日間が自動的に休薬表示になります。休薬は🌱、出血は🌷で表示します。日付をタップすると修正できます。左右にスワイプすると前後の月に移動できます。</p></div>`
 }
-function edit(x){let e=E(x);document.querySelector('#modal').innerHTML=`<div class="modal"><div class="sheet"><button class="close" onclick="closeM()">×</button><h2>${F(x)}</h2><button class="btn b" onclick="tog('${x}','med')">服薬 ${e.med?'✓':''}</button><br><br><button class="btn r" onclick="tog('${x}','bleed')">出血 ${e.bleed?'✓':''}</button><br><br><button class="btn g" onclick="tog('${x}','rest')">休薬 ${e.rest?'✓':''}</button><br><br><button class="btn gray" onclick="del('${x}')">この日の記録を削除</button><p class="note">過去の日付も追加・修正・削除できます。</p></div></div>`}
+function edit(x){let e=E(x);const isEx=s.exam===x;
+document.querySelector('#modal').innerHTML=`<div class="modal"><div class="sheet"><button class="close" onclick="closeM()">×</button><h2>${F(x)}</h2>
+<button class="btn p" onclick="setExam('${x}')">🏥 診察${isEx?' ✓（この日が予定）':''}</button><br><br>
+<button class="btn b" onclick="tog('${x}','med')">服薬 ${e.med?'✓':''}</button><br><br>
+<button class="btn r" onclick="tog('${x}','bleed')">出血 ${e.bleed?'✓':''}</button><br><br>
+<button class="btn g" onclick="tog('${x}','rest')">休薬 ${e.rest?'✓':''}</button><br><br>
+${isEx?'<button class="btn gray" onclick="clearExam()">診察予定を解除</button><p class="note">いまこの日が診察予定です。</p>':'<p class="note">「🏥 診察」を押すと、この日を診察予定として登録します。過去の日付も追加・修正・削除できます。</p>'}</div></div>`}
+function setExam(x){s.exam=x;save();closeM();render();toast(F(x)+'を診察予定にしました')}
+function clearExam(){s.exam='';save();closeM();render();toast('診察予定を解除しました')}
 function closeM(){document.querySelector('#modal').innerHTML=''}
 function tog(x,k){let e=E(x);e[k]=!e[k];if(k==='med'&&e.med){e.rest=false;e.time=new Date().toISOString()}if(k==='rest'&&e.rest)e.med=false;set(x,e);autoRest();closeM();render()}
 function del(x){delete s.e[x];save();closeM();render()}
 function history(){let meds=Object.keys(s.e).filter(x=>E(x).med).sort(),groups=[],cur=null;for(const x of meds){if(!cur||I(A(P(cur.b),1))!==x){if(cur)groups.push(cur);cur={a:x,b:x}}else cur.b=x}if(cur)groups.push(cur);document.querySelector('#history').innerHTML=`<div class="card"><h3>サイクル履歴</h3><div class="list">${groups.length?groups.map((c,i)=>{let rs=Object.keys(s.e).filter(x=>E(x).rest&&x>=I(A(P(c.b),1))).sort();let r1=rs[0],r2=r1?rs[Math.min(+s.rest-1,rs.length-1)]:null;return `<div class="cycle"><b>第${i+1}サイクル</b><p>服薬：${F(c.a)}〜${F(c.b)}（${Math.floor((P(c.b)-P(c.a))/86400000)+1}日）</p><p>休薬：${r1?F(r1)+'〜'+F(r2):'—'}</p></div>`}).join(''):'<p class="note">服薬記録がまだありません。</p>'}</div></div>`}
-function settings(){document.querySelector('#settings').innerHTML=`<div class="card"><h3>設定</h3><h4 style="margin:20px 0 4px">判定ルール</h4><label>連続服薬の上限日数</label><input id="mx" type="number" min="1" max="365" value="${s.max}"><label>休薬日数</label><input id="rs" type="number" min="1" max="14" value="${s.rest}"><div class="rulebox"><p><b>① 連続服薬の上限</b><br>${s.max}日連続で服薬した場合、翌日から${s.rest}日間を休薬とします。</p><p><b>② 3日連続の出血</b><br>出血が3日連続した場合は、${s.max}日の上限よりもこちらを優先し、3日目の翌日から${s.rest}日間を休薬とします。</p><p><b>③ 手動休薬</b><br>ホームの「休薬」を押すと、今日から${s.rest}日間を休薬として記録します。</p></div><button class="btn p" style="margin-top:16px;width:100%" onclick="saveSet()">設定を保存</button><p class="note">初期値：連続服薬120日／休薬4日。データは端末のLocalStorageに保存されます。保存状態：${store.ok?'OK':'保存不可（プライベートブラウズ等）'}／記録日数：${Object.keys(s.e).length}日。</p></div><div class="card"><h3>記録のバックアップ</h3><p class="note" style="margin-top:0">記録を1つのファイルに書き出します。機種変更や引っ越しのときに、新しい端末で「ファイルから復元」を選んでください。</p><div class="row"><button class="btn g" onclick="expJSON()">ファイルに書き出す</button><button class="btn b" onclick="document.querySelector('#imp').click()">ファイルから復元</button></div><input id="imp" type="file" accept=".json,application/json" style="display:none" onchange="impJSON(this)"><p class="note">iPhoneでは書き出したファイルは「ファイル」アプリに保存されます。復元は今の記録を置き換えるので、実行前に確認画面が出ます。</p></div><div class="card"><button class="btn gray" style="width:100%" onclick="if(confirm('全記録を削除しますか？')){s={max:120,rest:4,api:s.api,tok:s.tok,e:{}};save();render()}else{}">全記録を削除</button></div>`}
+function settings(){document.querySelector('#settings').innerHTML=`<div class="card"><h3>設定</h3><h4 style="margin:20px 0 4px">判定ルール</h4><label>連続服薬の上限日数</label><input id="mx" type="number" min="1" max="365" value="${s.max}"><label>休薬日数</label><input id="rs" type="number" min="1" max="14" value="${s.rest}"><div class="rulebox"><p><b>① 連続服薬の上限</b><br>${s.max}日連続で服薬した場合、翌日から${s.rest}日間を休薬とします。</p><p><b>② 3日連続の出血</b><br>出血が3日連続した場合は、${s.max}日の上限よりもこちらを優先し、3日目の翌日から${s.rest}日間を休薬とします。</p><p><b>③ 手動休薬</b><br>ホームの「休薬」を押すと、今日から${s.rest}日間を休薬として記録します。</p></div><button class="btn p" style="margin-top:16px;width:100%" onclick="saveSet()">設定を保存</button><p class="note">初期値：連続服薬120日／休薬4日。データは端末のLocalStorageに保存されます。保存状態：${store.ok?'OK':'保存不可（プライベートブラウズ等）'}／記録日数：${Object.keys(s.e).length}日。</p></div><div class="card"><h3>シート管理</h3><p class="note" style="margin-top:0">いま飲んでいるシートの情報です。ここを直すと、ホームの「診察のめやす」とカレンダーの診察期間が計算し直されます。</p>
+<label>このシートの飲み始めた日</label><input id="shs" type="date" value="${s.sheetStart||''}">
+<div class="row"><div style="flex:1"><label>1シートの錠数</label><input id="sd" type="number" min="1" max="90" value="${s.sheetDays||24}"></div><div style="flex:1"><label>処方シート数</label><input id="shn" type="number" min="1" max="12" value="${s.sheets||3}"></div></div>
+<label>このシートは何シート目か</label><input id="shb" type="number" min="1" max="12" value="${s.sheetBase||3}">
+<label>診察予定日（空欄なら未定）</label><input id="exm" type="date" value="${s.exam||''}">
+<button class="btn p" style="margin-top:16px;width:100%" onclick="saveSheet()">シート情報を保存</button></div>
+<div class="card"><h3>記録のバックアップ</h3><p class="note" style="margin-top:0">記録を1つのファイルに書き出します。機種変更や引っ越しのときに、新しい端末で「ファイルから復元」を選んでください。</p><div class="row"><button class="btn g" onclick="expJSON()">ファイルに書き出す</button><button class="btn b" onclick="document.querySelector('#imp').click()">ファイルから復元</button></div><input id="imp" type="file" accept=".json,application/json" style="display:none" onchange="impJSON(this)"><p class="note">iPhoneでは書き出したファイルは「ファイル」アプリに保存されます。復元は今の記録を置き換えるので、実行前に確認画面が出ます。</p></div><div class="card"><button class="btn gray" style="width:100%" onclick="if(confirm('全記録を削除しますか？')){s={max:120,rest:4,api:s.api,tok:s.tok,e:{}};save();render()}else{}">全記録を削除</button></div>`}
 function saveSet(){
   s.max=+document.querySelector('#mx').value||120;
   s.rest=+document.querySelector('#rs').value||4;
@@ -207,8 +289,14 @@ function impJSON(inp){
   r.onerror=()=>{toast('ファイルを開けませんでした');inp.value=''};
   r.readAsText(f);
 }
+function saveSheet(){
+  const v=id=>{const el=document.querySelector('#'+id);return el?el.value:''};
+  const sd=+v('sd')||24,shn=+v('shn')||3,shb=+v('shb')||1;
+  s.sheetDays=sd;s.sheets=shn;s.sheetBase=shb;s.sheetStart=v('shs')||s.sheetStart;s.exam=v('exm')||'';
+  save();render();toast('シート情報を保存しました');
+}
 function render(){autoRest();home();cal();history();settings()}
 document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));b.classList.add('on');['home','calendar','history','settings'].forEach(p=>document.querySelector('#'+p).classList.toggle('hide',p!==b.dataset.p))});
 render();
-</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
+</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 </body></html>
