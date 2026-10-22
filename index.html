@@ -23,7 +23,7 @@ const MED_RANGES=[
  ['2025-08-22','2025-10-11'],['2025-12-31','2026-02-13'],['2026-02-18','2026-06-01'],
  ['2026-06-06','2026-09-22'],['2026-09-26','2026-09-27']
 ];
-const pad2=n=>(n<10?'0':'')+n,isoOf=d=>{const x=d instanceof Date?d:new Date(d);return x.getFullYear()+'-'+pad2(x.getMonth()+1)+'-'+pad2(x.getDate())};
+const pad2=n=>(n<10?'0':'')+n,isoOf=d=>{const x=d instanceof Date?d:new Date(d);if(!x||isNaN(x.getTime()))return '';return x.getFullYear()+'-'+pad2(x.getMonth()+1)+'-'+pad2(x.getDate())},okDate=v=>{if(typeof v!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(v))return false;const t=new Date(v+'T00:00:00');return !isNaN(t.getTime())};
 function buildHistory(){
   const e={};
   const start=new Date('2023-02-16T00:00:00'), end=new Date('2026-09-27T00:00:00');
@@ -39,11 +39,13 @@ let s=null;try{s=JSON.parse(store.get(K)||'null')}catch(e){s=null}
 if(!s||typeof s!=='object')s={...DEFAULT,e:buildHistory()};
 if(!s.e||Object.keys(s.e).length===0)s.e=buildHistory();
 s.max=+s.max||120;s.rest=+s.rest||4;s.sheetDays=+s.sheetDays||24;s.sheets=+s.sheets||3;s.sheetBase=+s.sheetBase||3;
-if(!s.sheetStart)s.sheetStart='2026-10-08';
-if(typeof s.exam!=='string')s.exam=isoOf(s.exam||'');
+if(!okDate(s.sheetStart))s.sheetStart='2026-10-08';
+if(!okDate(s.exam))s.exam='';
+if(!s.e||typeof s.e!=='object')s.e={};
+for(const k of Object.keys(s.e))if(!okDate(k))delete s.e[k];
 if('notify' in s)delete s.notify;if('api' in s)delete s.api;if('tok' in s)delete s.tok;
 let cm=new Date();cm.setDate(1);
-const I=isoOf,T=()=>{let d=new Date();d.setHours(0,0,0,0);return d},P=x=>new Date(x+'T00:00:00'),A=(d,n)=>{let x=new Date(d);x.setDate(x.getDate()+n);return x},F=(()=>{const f=new Intl.DateTimeFormat('ja-JP',{year:'numeric',month:'numeric',day:'numeric'});return x=>f.format(P(x))})(),E=x=>s.e[x]||{},save=()=>store.set(K,JSON.stringify(s));
+const I=isoOf,T=()=>{let d=new Date();d.setHours(0,0,0,0);return d},P=x=>new Date(x+'T00:00:00'),A=(d,n)=>{let x=new Date(d);x.setDate(x.getDate()+n);return x},F=(()=>{const f=new Intl.DateTimeFormat('ja-JP',{year:'numeric',month:'numeric',day:'numeric'});return x=>{const d=(x instanceof Date)?x:P(x);if(!d||isNaN(d.getTime()))return '—';try{return f.format(d)}catch(e){return '—'}}})(),E=x=>s.e[x]||{},save=()=>store.set(K,JSON.stringify(s));
 function set(x,v){let next={...E(x),...v};if(!Object.values(next).some(Boolean))delete s.e[x];else s.e[x]=next;save()}
 function medRun(x){let n=0,d=P(x);while(E(I(d)).med){n++;d=A(d,-1)}return n}
 function bleedRun(x){let n=0,d=P(x);while(E(I(d)).bleed){n++;d=A(d,-1)}return n}
@@ -98,6 +100,7 @@ function autoRest(){
 /* ===== シート（24日／3シート）と診察のめやす ===== */
 function sheetInfo(){
   const conf={days:+s.sheetDays||24,n:+s.sheets||3,start:s.sheetStart||'2026-10-08'};
+  if(!okDate(conf.start))conf.start=isoOf(T());
   const start=P(conf.start);
   // 起点から「24錠 + その後の休薬」を積み上げて、各シートの範囲を作る
   let cur=start,sheets=[],cursor=start;
@@ -174,7 +177,7 @@ function home(){
   else if(t==='med')next=`あと${Math.max(0,+s.max-n)}日`;
   document.querySelector('#home').innerHTML=`
   <div class="card status"><div class="small">${t==='rest'?'現在は休薬期間':t==='med'?'現在は服薬期間':'記録待ち'}</div><div class="big">${t==='rest'?`休薬 ${n}日目`:t==='med'?`連続服薬 ${n}日目`:'服薬開始前'}</div><div class="small">${F(x)}</div><div class="bar"><i style="width:${pct}%"></i></div><div class="note">${t==='rest'?`あと${Math.max(0,+s.rest-n)}日で服薬再開`:`上限 ${s.max}日まであと${Math.max(0,+s.max-n)}日`}</div></div>
-  <div class="card"><div class="row"><button class="btn b" onclick="take()">💊 服薬${e.med?' ✓':''}</button><button class="btn g" onclick="manualRest()">🌱 休薬</button><button class="btn r" onclick="bleed()">🌷${e.bleed?' ✓':''}</button></div><div class="note" style="margin-top:9px">${e.time?'服薬時刻：'+new Date(e.time).toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'}):'「服薬」を押すと、今日の服薬としてすぐに記録されます。'}</div></div>
+  <div class="card"><div class="row"><button class="btn b" onclick="take()">💊 服薬${e.med?' ✓':''}</button><button class="btn g" onclick="manualRest()">🌱 休薬</button><button class="btn r" onclick="bleed()">🌷${e.bleed?' ✓':''}</button></div><div class="note" style="margin-top:9px">${e.time?'服薬時刻：'+(isNaN(new Date(e.time).getTime())?'—':new Date(e.time).toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'})):'「服薬」を押すと、今日の服薬としてすぐに記録されます。'}</div></div>
 
   ${(()=>{const S=sheetInfo();
     let st,colour,main,sub;
@@ -292,7 +295,7 @@ function impJSON(inp){
 function saveSheet(){
   const v=id=>{const el=document.querySelector('#'+id);return el?el.value:''};
   const sd=+v('sd')||24,shn=+v('shn')||3,shb=+v('shb')||1;
-  s.sheetDays=sd;s.sheets=shn;s.sheetBase=shb;s.sheetStart=v('shs')||s.sheetStart;s.exam=v('exm')||'';
+  s.sheetDays=sd;s.sheets=shn;s.sheetBase=shb;s.sheetStart=okDate(v('shs'))?v('shs'):s.sheetStart;s.exam=okDate(v('exm'))?v('exm'):'';
   save();render();toast('シート情報を保存しました');
 }
 function render(){autoRest();home();cal();history();settings()}
