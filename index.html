@@ -44,6 +44,10 @@ if(!okDate(s.exam))s.exam='';
 if(!s.e||typeof s.e!=='object')s.e={};
 for(const k of Object.keys(s.e))if(!okDate(k))delete s.e[k];
 if('notify' in s)delete s.notify;if('api' in s)delete s.api;if('tok' in s)delete s.tok;
+if(typeof navigator!=='undefined'&&typeof navigator.sendBeacon==='function'){
+  const _sb=navigator.sendBeacon.bind(navigator);
+  navigator.sendBeacon=(u,...a)=>{try{if(typeof location==='undefined'||!String(location.protocol).startsWith('http'))return false;return _sb(u,...a)}catch(e){return false}};
+}
 let cm=new Date();cm.setDate(1);
 const I=isoOf,T=()=>{let d=new Date();d.setHours(0,0,0,0);return d},P=x=>new Date(x+'T00:00:00'),A=(d,n)=>{let x=new Date(d);x.setDate(x.getDate()+n);return x},F=(()=>{const f=new Intl.DateTimeFormat('ja-JP',{year:'numeric',month:'numeric',day:'numeric'});return x=>{const d=(x instanceof Date)?x:P(x);if(!d||isNaN(d.getTime()))return '—';try{return f.format(d)}catch(e){return '—'}}})(),E=x=>s.e[x]||{},save=()=>store.set(K,JSON.stringify(s));
 function set(x,v){let next={...E(x),...v};if(!Object.values(next).some(Boolean))delete s.e[x];else s.e[x]=next;save()}
@@ -179,26 +183,21 @@ function home(){
   <div class="card status"><div class="small">${t==='rest'?'現在は休薬期間':t==='med'?'現在は服薬期間':'記録待ち'}</div><div class="big">${t==='rest'?`休薬 ${n}日目`:t==='med'?`連続服薬 ${n}日目`:'服薬開始前'}</div><div class="small">${F(x)}</div><div class="bar"><i style="width:${pct}%"></i></div><div class="note">${t==='rest'?`あと${Math.max(0,+s.rest-n)}日で服薬再開`:`上限 ${s.max}日まであと${Math.max(0,+s.max-n)}日`}</div></div>
   <div class="card"><div class="row"><button class="btn b" onclick="take()">💊 服薬${e.med?' ✓':''}</button><button class="btn g" onclick="manualRest()">🌱 休薬</button><button class="btn r" onclick="bleed()">🌷${e.bleed?' ✓':''}</button></div><div class="note" style="margin-top:9px">${e.time?'服薬時刻：'+(isNaN(new Date(e.time).getTime())?'—':new Date(e.time).toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'})):'「服薬」を押すと、今日の服薬としてすぐに記録されます。'}</div></div>
 
-  ${(()=>{const S=sheetInfo();
-    let st,colour,main,sub;
-    if(S.exam){
-      const d=S.daysToExam;
-      main=`診察予定 ${F(S.exam)}（${wd(S.exam)}）`;
-      sub=d>0?`あと${d}日`:(d===0?'今日です':`${-d}日過ぎています`);
-      colour=d<0?'#ffe1e6':(d<=2?'#fff3d6':'#eef7ee');
-    }else{
-      main='予定（未定）';sub='カレンダーの日付をタップして「診察」を選ぶと登録できます';
-      colour='#fff8fa';
-    }
-    const pr=S.afterPeriod?'診察期間が終了しました':(S.inPeriod?'診察期間中':'まだ診察期間の前です');
-    return `<div class="card" style="background:${colour}">
-      <h3>🏥 診察のめやす</h3>
-      <p style="margin:8px 0 4px;font-size:15px"><b>シート ${S.no}／${S.conf.n}</b> ・ ${S.conf.days}錠中 ${S.taken}錠目（残り ${S.remain}錠）</p>
-      <p style="margin:4px 0;font-size:13px">診察期間 ${F(S.periodStart)} 〜 ${F(S.periodEnd)}</p>
-      <p style="margin:4px 0;font-size:13px">［${main}・${sub}］</p>
-      <div class="note" style="margin-top:8px">${pr}／最終服薬日は ${F(S.last)}（${wd(S.last)}）の見込み。${S.lastWeekday!==S.periodEnd?`薬が切れる前に 平日の ${F(S.lastWeekday)} が実質の期限です。`:''}</div>
-    </div>`})()}
   <div class="card"><div class="summary"><div class="mini"><span>次の休薬予定</span><b>${next}</b></div><div class="mini"><span>過去3日間の出血</span><b>${b}日</b></div></div>${ps?`<p class="note" style="margin-top:10px">📅 カレンダーでは、次の休薬${F(ps)}〜${F(I(A(P(ps),+s.rest-1)))}を予定として表示しています。</p>`:''}</div>
+  ${(()=>{const S=sheetInfo();
+    let main,sub,pill;
+    if(S.exam){const d=S.daysToExam;
+      main=`診察予定 ${F(S.exam)}（${wd(S.exam)}）`;sub=d>0?`あと${d}日`:(d===0?'今日です':`${-d}日過ぎています`);
+      pill=d<0?'background:#ffdce5;color:#a34f69':(d<=2?'background:#fff0f3;color:#76623c':'background:#dcf3df;color:#4f7658');
+    }else{main='予定（未定）';sub='カレンダーの日付をタップして「診察」を選ぶと登録できます';pill='background:#fff0f3;color:#76623c'}
+    const pr=S.afterPeriod?'診察期間が終了しました':(S.inPeriod?'診察期間中':'まだ診察期間の前です');
+    return `<div class="card" style="background:#fff8fa">
+      <h3>🏥 診察のめやす</h3>
+      <div class="summary"><div class="mini"><span>シート</span><b>${S.no}／${S.conf.n}</b></div><div class="mini"><span>残り</span><b>${S.remain}錠</b></div></div>
+      <p style="margin:10px 0 0;font-size:13px">${S.conf.days}錠中 ${S.taken}錠目 ／ 診察期間 ${F(S.periodStart)} 〜 ${F(S.periodEnd)}</p>
+      <p style="margin:9px 0 0"><span class="plan" style="display:inline-block;padding:7px 12px;border-radius:12px;font-weight:800;font-size:13px;${pill}">${main}・${sub}</span></p>
+      <div class="note" style="margin-top:9px">${pr}／最終服薬日は ${F(S.last)}（${wd(S.last)}）の見込み。${S.lastWeekday!==S.periodEnd?`薬が切れる前に 平日の ${F(S.lastWeekday)} が実質の期限です。`:''}</div>
+    </div>`})()}
 `
 }
 function cal(){
@@ -216,11 +215,11 @@ function cal(){
 }
 function edit(x){let e=E(x);const isEx=s.exam===x;
 document.querySelector('#modal').innerHTML=`<div class="modal"><div class="sheet"><button class="close" onclick="closeM()">×</button><h2>${F(x)}</h2>
+<button class="btn b" onclick="tog('${x}','med')">💊 服薬 ${e.med?'✓':''}</button><br><br>
+<button class="btn g" onclick="tog('${x}','rest')">🌱 休薬 ${e.rest?'✓':''}</button><br><br>
+<button class="btn r" onclick="tog('${x}','bleed')">🌷 出血 ${e.bleed?'✓':''}</button><br><br>
 <button class="btn p" onclick="setExam('${x}')">🏥 診察${isEx?' ✓（この日が予定）':''}</button><br><br>
-<button class="btn b" onclick="tog('${x}','med')">服薬 ${e.med?'✓':''}</button><br><br>
-<button class="btn r" onclick="tog('${x}','bleed')">出血 ${e.bleed?'✓':''}</button><br><br>
-<button class="btn g" onclick="tog('${x}','rest')">休薬 ${e.rest?'✓':''}</button><br><br>
-${isEx?'<button class="btn gray" onclick="clearExam()">診察予定を解除</button><p class="note">いまこの日が診察予定です。</p>':'<p class="note">「🏥 診察」を押すと、この日を診察予定として登録します。過去の日付も追加・修正・削除できます。</p>'}</div></div>`}
+${isEx?'<button class="btn gray" onclick="clearExam()">診察予定を解除</button><p class="note">いまこの日が診察予定です。</p>':'<p class="note">「🏥 診察」を押すと、この日を診察予定として登録します。過去の日付も追加・修正・削除できます。</p>'}<button class="btn gray" onclick="del('${x}')" style="margin-top:14px">この日の記録を削除</button></div></div>`}
 function setExam(x){s.exam=x;save();closeM();render();toast(F(x)+'を診察予定にしました')}
 function clearExam(){s.exam='';save();closeM();render();toast('診察予定を解除しました')}
 function closeM(){document.querySelector('#modal').innerHTML=''}
