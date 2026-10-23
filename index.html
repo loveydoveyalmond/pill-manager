@@ -134,11 +134,24 @@ function sheetInfo(){
   const inPeriod=today>=periodStart&&today<=periodEnd;
   const afterPeriod=today>periodEnd;
   const lastWeekday=weekdayOnOrBefore(periodEnd);
-  const exam=s.exam||'';
-  let daysToExam=null;
-  if(exam)daysToExam=Math.round((P(exam)-T())/86400000);
-  return {conf,sheets,idx,taken,remain,sh,last,periodStart,periodEnd,inPeriod,afterPeriod,lastWeekday,exam,daysToExam,
+  return {conf,sheets,idx,taken,remain,sh,last,periodStart,periodEnd,inPeriod,afterPeriod,lastWeekday,exam: s.exam||'',
     no:(+s.sheetBase||1)-1+sh.no,afterRest:sh.gap?{a:I(A(P(sh.b),1)),b:I(A(P(sh.b),sh.gap))}:null};
+}
+function examWindows(){
+  const conf={days:+s.sheetDays||24,n:+s.sheets||3,rest:+s.rest||4,base:+s.sheetBase||1,start:s.sheetStart||'2026-10-08'};
+  if(!okDate(conf.start))conf.start=isoOf(T());
+  const per=conf.days+conf.rest,cyc=conf.n*per;
+  const c0=I(A(P(conf.start),-((conf.base-1)*per)));
+  const out=[];
+  for(let k=0;k<4;k++){
+    const st=I(A(P(c0),k*cyc)),sh=[];
+    for(let i=0;i<conf.n;i++){const a=I(A(P(st),i*per));sh.push({a:a,b:I(A(P(a),conf.days-1))})}
+    const last=sh[sh.length-1].b;
+    out.push({k:k,sheets:sh,from:I(A(P(last),-(Math.min(10,conf.days)-1))),to:last,
+      rest:{a:I(A(P(last),1)),b:I(A(P(last),conf.rest))}});
+  }
+  try{const A0=sheetInfo();if(out[0]){out[0].from=A0.periodStart;out[0].to=A0.periodEnd}}catch(e){}
+  return out;
 }
 function weekdayOnOrBefore(x){let d=P(x);while([0,6].includes(d.getDay()))d=A(d,-1);return I(d)}
 const W=['日','月','火','水','木','金','土'];
@@ -184,19 +197,15 @@ function home(){
   <div class="card"><div class="row"><button class="btn b" onclick="take()">💊 服薬${e.med?' ✓':''}</button><button class="btn g" onclick="manualRest()">🌱 休薬</button><button class="btn r" onclick="bleed()">🌷${e.bleed?' ✓':''}</button></div><div class="note" style="margin-top:9px">${e.time?'服薬時刻：'+(isNaN(new Date(e.time).getTime())?'—':new Date(e.time).toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'})):'「服薬」を押すと、今日の服薬としてすぐに記録されます。'}</div></div>
 
   <div class="card"><div class="summary"><div class="mini"><span>次の休薬予定</span><b>${next}</b></div><div class="mini"><span>過去3日間の出血</span><b>${b}日</b></div></div>${ps?`<p class="note" style="margin-top:10px">📅 カレンダーでは、次の休薬${F(ps)}〜${F(I(A(P(ps),+s.rest-1)))}を予定として表示しています。</p>`:''}</div>
-  ${(()=>{const S=sheetInfo();
-    let main,sub,pill;
-    if(S.exam){const d=S.daysToExam;
-      main=`診察予定 ${F(S.exam)}（${wd(S.exam)}）`;sub=d>0?`あと${d}日`:(d===0?'今日です':`${-d}日過ぎています`);
-      pill=d<0?'background:#ffdce5;color:#a34f69':(d<=2?'background:#fff0f3;color:#76623c':'background:#dcf3df;color:#4f7658');
-    }else{main='予定（未定）';sub='カレンダーの日付をタップして「診察」を選ぶと登録できます';pill='background:#fff0f3;color:#76623c'}
-    const pr=S.afterPeriod?'診察期間が終了しました':(S.inPeriod?'診察期間中':'まだ診察期間の前です');
-    return `<div class="card" style="background:#fff8fa">
+  ${(()=>{const S=sheetInfo(),WS=examWindows();
+    const ex=S.exam?`<b>${F(S.exam)}（${wd(S.exam)}）</b>`:`<b>予定（未定）</b>`;
+    const fut=WS.slice(1,3).map((w,i)=>`<p class="note" style="margin:3px 0 0">${i===0?'次回':'次々回'}　${F(w.from)} 〜 ${F(w.to)}</p>`).join('');
+    return `<div class="card">
       <h3>🏥 診察のめやす</h3>
       <div class="summary"><div class="mini"><span>シート</span><b>${S.no}／${S.conf.n}</b></div><div class="mini"><span>残り</span><b>${S.remain}錠</b></div></div>
-      <p style="margin:10px 0 0;font-size:13px">${S.conf.days}錠中 ${S.taken}錠目 ／ 診察期間 ${F(S.periodStart)} 〜 ${F(S.periodEnd)}</p>
-      <p style="margin:9px 0 0"><span class="plan" style="display:inline-block;padding:7px 12px;border-radius:12px;font-weight:800;font-size:13px;${pill}">${main}・${sub}</span></p>
-      <div class="note" style="margin-top:9px">${pr}／最終服薬日は ${F(S.last)}（${wd(S.last)}）の見込み。${S.lastWeekday!==S.periodEnd?`薬が切れる前に 平日の ${F(S.lastWeekday)} が実質の期限です。`:''}</div>
+      <p class="note" style="margin-top:10px">診察期間　${F(WS[0].from)} 〜 ${F(WS[0].to)}<br>最終服薬日は ${F(S.last)}（${wd(S.last)}）の見込みです。</p>
+      <p style="margin:9px 0 0;font-size:13px">診察予定　${ex}</p>
+      <div style="margin-top:10px;padding-top:9px;border-top:1px solid var(--line)">${fut}<p class="note" style="margin-top:4px">次の3シート以降の診察期間です。</p></div>
     </div>`})()}
 `
 }
@@ -204,12 +213,12 @@ function cal(){
   let y=cm.getFullYear(),m=cm.getMonth(),f=new Date(y,m,1),days=new Date(y,m+1,0).getDate(),w=f.getDay(),planned=projectedRestDates(),h='';
   for(let q of ['日','月','火','水','木','金','土'])h+=`<div class="dow">${q}</div>`;
   for(let i=0;i<w;i++)h+='<div></div>';
-  const S=sheetInfo();
+  const WS=examWindows();
   for(let d=1;d<=days;d++){
     let x=I(new Date(y,m,d)),e=E(x),isPlan=planned.has(x)&&!e.rest;
-    const inPeriod=x>=S.periodStart&&x<=S.periodEnd,isExam=(s.exam===x);
+    const W=WS.find(w=>x>=w.from&&x<=w.to);const inPeriod=!!W,isExam=(s.exam===x);
     let marks=(e.med?'💊':'')+(e.rest?'🌱':'')+(e.bleed?'🌷':'')+(isPlan?'🌱':'')+(isExam?'🏥':'');
-    h+=`<button class="day ${x===I(T())?'today':''} ${isPlan?'planned':''} ${inPeriod?'exam-period':''} ${isExam?'exam-day':''}" onclick="edit('${x}')"><b>${d}</b><div class="mark">${marks||' '}</div>${isPlan?'<div style="font-size:9px;color:#8b7545">休薬予定</div>':''}${inPeriod&&d===P(S.periodStart).getDate()?'<div style="font-size:8px;color:#4a6b96;font-weight:700">診察期間</div>':''}</button>`
+    h+=`<button class="day ${x===I(T())?'today':''} ${isPlan?'planned':''} ${inPeriod?'exam-period':''} ${isExam?'exam-day':''}" onclick="edit('${x}')"><b>${d}</b><div class="mark">${marks||' '}</div>${isPlan?'<div style="font-size:9px;color:#8b7545">休薬予定</div>':''}${inPeriod&&x===W.from?'<div style="font-size:8px;color:#4a6b96;font-weight:700">診察期間</div>':''}</button>`
   }
   document.querySelector('#calendar').innerHTML=`<div class="card"><div class="month"><button class="nav" onclick="shiftMonth(-1)">‹</button><b>${y}年${m+1}月</b><button class="nav" onclick="shiftMonth(1)">›</button></div><button class="today-btn" onclick="goToday()">${(y===T().getFullYear()&&m===T().getMonth())?'今日を表示中':'⌂ 今日に戻る'}</button><div class="cal">${h}</div><div class="legend"><span>💊服薬</span><span>🌱休薬</span><span>🌷出血</span><span>🏥診察予定</span><span style="background:#eef4ff;padding:1px 5px;border-radius:5px">◻診察期間</span></div><p class="note">3日連続出血、または${s.max}日連続服薬が成立すると、翌日から${s.rest}日間が自動的に休薬表示になります。休薬は🌱、出血は🌷で表示します。日付をタップすると修正できます。左右にスワイプすると前後の月に移動できます。</p></div>`
 }
