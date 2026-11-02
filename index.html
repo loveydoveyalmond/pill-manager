@@ -102,56 +102,64 @@ function autoRest(){
 }
 
 /* ===== シート（24日／3シート）と診察のめやす ===== */
-function sheetInfo(){
-  const conf={days:+s.sheetDays||24,n:+s.sheets||3,start:s.sheetStart||'2026-10-08'};
-  if(!okDate(conf.start))conf.start=isoOf(T());
-  const start=P(conf.start);
-  // 起点から「24錠 + その後の休薬」を積み上げて、各シートの範囲を作る
-  let cur=start,sheets=[],cursor=start;
-  for(let i=0;i<conf.n;i++){
-    const a=I(cursor),b=I(A(cursor,conf.days-1));
-    // そのシート終了後に実際に休薬が入っていれば、その分だけ次のシートをずらす
-    let gap=0,d=A(cursor,conf.days);
-    for(let g=0;g<+s.rest;g++){ if(E(I(A(d,g))).rest)gap=g+1; else break; }
-    sheets.push({no:i+1,a,b,gap:gap});
-    cursor=A(d,gap);
+/* ===== シート進行：24錠で1シート、3シートで1サイクル、飲み終えたら4日休薬 ===== */
+function sheetTimeline(asOf){
+  const conf={days:+s.sheetDays||24,n:+s.sheets||3,rest:+s.rest||4,base:+s.sheetBase||1,start:(okDate(s.sheetStart)?s.sheetStart:'2026-10-08')};
+  let cur=P(conf.start), horizon=P(I(A(P(asOf||I(T())),420)));
+  let N=0, dayMap={}, sheets=[], guard=0;
+  while(cur<=horizon && guard<4000){
+    // --- 1シート＝24錠。記録で休薬の日は錠数を進めない ---
+    let inSheet=0;
+    while(inSheet<conf.days && guard<4000){
+      guard++;
+      const d=I(cur), rec=E(d);
+      if(rec.rest){ dayMap[d]={type:'rest'}; cur=A(cur,1); continue; }
+      N++; inSheet++;
+      const sidx=Math.floor((N-1)/conf.days), label=((conf.base-1+sidx)%conf.n)+1;
+      dayMap[d]={type:'pill',N:N,sidx:sidx,label:label,pill:((N-1)%conf.days)+1};
+      if(!sheets[sidx])sheets[sidx]={sidx:sidx,label:label,first:d,last:d};
+      sheets[sidx].last=d;
+      cur=A(cur,1);
+    }
+    // --- シートを飲み終えたら自動で4日休薬（記録で服薬になっていれば次シートへ） ---
+    let r=0;
+    while(r<conf.rest && guard<4000){
+      guard++;
+      const d=I(cur), rec=E(d);
+      if(rec.med) break;
+      if(!dayMap[d]) dayMap[d]={type:'rest'};
+      r++; cur=A(cur,1);
+    }
   }
-  // 飲み終えたシート数＝最終服薬日を含むシートまで
-  // いま何錠目か：記録があれば数える。記録が無い期間ならシート開始日からの経過日数で代用。
-  const today0=I(T());
-  const cnt=(a,b)=>{let n=0;for(let d=P(a);d<=P(b);d=A(d,1))if(E(I(d)).med)n++;return n};
-  let taken=cnt(sheets[0].a,today0);
-  if(!taken)taken=Math.round((T()-P(sheets[0].a))/86400000)+1;
-  taken=Math.max(1,Math.min(conf.days,taken));
-  const idx=Math.min(Math.floor((taken-1)/conf.days),sheets.length-1);
-  const remain=Math.max(0,conf.days-taken);
-  const rawSh=sheets[idx];
-  const sh=rawSh||{no:1,a:conf.start,b:conf.start,gap:0};
-  const last=sh.gap?I(A(P(sh.b),sh.gap)):sh.b;      // 休薬込みの見込み最終服薬日（=予定の最終日）
-  const periodStart=I(A(P(sh.b),-(Math.min(10,conf.days)-1)));  // 最後の10日間
-  const periodEnd=sh.b;
-  const today=I(T());
-  const inPeriod=today>=periodStart&&today<=periodEnd;
-  const afterPeriod=today>periodEnd;
-  const lastWeekday=weekdayOnOrBefore(periodEnd);
-  return {conf,sheets,idx,taken,remain,sh,last,periodStart,periodEnd,inPeriod,afterPeriod,lastWeekday,exam: s.exam||'',
-    no:(+s.sheetBase||1)-1+sh.no,afterRest:sh.gap?{a:I(A(P(sh.b),1)),b:I(A(P(sh.b),sh.gap))}:null};
+  // --- 3シートで1サイクル（ラベルnのシートで区切る） ---
+  let course=0;
+  for(const sh of sheets){ if(!sh)continue; sh.course=course; if(sh.label===conf.n) course++; }
+  for(const d of Object.keys(dayMap)){ const m=dayMap[d]; if(m.type==='pill'&&sheets[m.sidx]) m.course=sheets[m.sidx].course; }
+  const cycles=[];
+  for(const sh of sheets){ if(!sh)continue; cycles[sh.course]={from:I(A(P(sh.last),-(Math.min(10,conf.days)-1))),to:sh.last}; }
+  return {conf:conf,sheets:sheets,dayMap:dayMap,cycles:cycles};
+}
+function sheetState(asOf){
+  const TL=sheetTimeline(asOf), conf=TL.conf;
+  const today=asOf?I(P(asOf)):I(T());
+  const e=TL.dayMap[today]||{};
+  const resting=(e.type==='rest');
+  let restDay=0;
+  if(resting){ let c=0,d=P(today); while(TL.dayMap[I(d)]&&TL.dayMap[I(d)].type==='rest'){c++;d=A(d,-1)} restDay=c; }
+  let nxt=null,d=A(P(today),1);
+  for(let i=0;i<60;i++){ const m=TL.dayMap[I(d)]; if(m&&m.type==='pill'){nxt={date:I(d),m:m};break} d=A(d,1) }
+  const sidx=(e.sidx!=null)?e.sidx:0;
+  const sh=TL.sheets[sidx]||TL.sheets[0]||{label:conf.base,last:conf.start,course:0};
+  const pill=resting?conf.days:(e.pill||conf.days);
+  return {conf:conf,resting:resting,restDay:restDay,
+    sheet:(e.label!=null?e.label:sh.label),pill:pill,remain:Math.max(0,conf.days-pill),
+    last:sh.last,course:(e.course!=null?e.course:sh.course),cycles:TL.cycles,
+    nextDate:nxt?nxt.date:null,nextSheet:nxt?nxt.m.label:null,nextPillNo:nxt?nxt.m.pill:null,
+    exam:(okDate(s.exam)?s.exam:'')};
 }
 function examWindows(){
-  const conf={days:+s.sheetDays||24,n:+s.sheets||3,rest:+s.rest||4,base:+s.sheetBase||1,start:s.sheetStart||'2026-10-08'};
-  if(!okDate(conf.start))conf.start=isoOf(T());
-  const per=conf.days+conf.rest,cyc=conf.n*per;
-  const c0=I(A(P(conf.start),-((conf.base-1)*per)));
-  const out=[];
-  for(let k=0;k<4;k++){
-    const st=I(A(P(c0),k*cyc)),sh=[];
-    for(let i=0;i<conf.n;i++){const a=I(A(P(st),i*per));sh.push({a:a,b:I(A(P(a),conf.days-1))})}
-    const last=sh[sh.length-1].b;
-    out.push({k:k,sheets:sh,from:I(A(P(last),-(Math.min(10,conf.days)-1))),to:last,
-      rest:{a:I(A(P(last),1)),b:I(A(P(last),conf.rest))}});
-  }
-  try{const A0=sheetInfo();if(out[0]){out[0].from=A0.periodStart;out[0].to=A0.periodEnd}}catch(e){}
-  return out;
+  const TL=sheetTimeline();
+  return Object.keys(TL.cycles).map(Number).sort((a,b)=>a-b).map(k=>({k:k,from:TL.cycles[k].from,to:TL.cycles[k].to}));
 }
 function weekdayOnOrBefore(x){let d=P(x);while([0,6].includes(d.getDay()))d=A(d,-1);return I(d)}
 const W=['日','月','火','水','木','金','土'];
@@ -197,13 +205,19 @@ function home(){
   <div class="card"><div class="row"><button class="btn b" onclick="take()">💊 服薬${e.med?' ✓':''}</button><button class="btn g" onclick="manualRest()">🌱 休薬</button><button class="btn r" onclick="bleed()">🌷${e.bleed?' ✓':''}</button></div><div class="note" style="margin-top:9px">${e.time?'服薬時刻：'+(isNaN(new Date(e.time).getTime())?'—':new Date(e.time).toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'})):'「服薬」を押すと、今日の服薬としてすぐに記録されます。'}</div></div>
 
   <div class="card"><div class="summary"><div class="mini"><span>次の休薬予定</span><b>${next}</b></div><div class="mini"><span>過去3日間の出血</span><b>${b}日</b></div></div>${ps?`<p class="note" style="margin-top:10px">📅 カレンダーでは、次の休薬${F(ps)}〜${F(I(A(P(ps),+s.rest-1)))}を予定として表示しています。</p>`:''}</div>
-  ${(()=>{const S=sheetInfo(),WS=examWindows();
+  ${(()=>{const S=sheetState();
+    const cur=S.cycles[S.course]||S.cycles[0]||{from:S.last,to:S.last};
     const ex=S.exam?`<b>${F(S.exam)}（${wd(S.exam)}）</b>`:`<b>予定（未定）</b>`;
-    const fut=WS.slice(1,3).map((w,i)=>`<p class="note" style="margin:3px 0 0">${i===0?'次回':'次々回'}　${F(w.from)} 〜 ${F(w.to)}</p>`).join('');
+    const fut=S.cycles.slice(S.course+1,S.course+3).map((w,i)=>`<p class="note" style="margin:3px 0 0">${i===0?'次回':'次々回'}　${F(w.from)} 〜 ${F(w.to)}</p>`).join('');
+    const mini1=S.resting?`<div class="mini"><span>シート</span><b>${S.sheet}／${S.conf.n} 終了</b></div>`:`<div class="mini"><span>シート</span><b>${S.sheet}／${S.conf.n}</b></div>`;
+    const mini2=S.resting?`<div class="mini"><span>休薬</span><b>${S.restDay}日目</b></div>`:`<div class="mini"><span>錠数</span><b>${S.pill}／${S.conf.days}錠</b></div>`;
+    const note=S.resting
+      ? `休薬中です。次は ${S.nextDate?F(S.nextDate):'—'} から <b>${S.nextSheet||1}シート目・1錠目</b> です。`
+      : `最終服薬日は ${F(S.last)}（${wd(S.last)}）の見込みです。`;
     return `<div class="card">
       <h3>🏥 診察のめやす</h3>
-      <div class="summary"><div class="mini"><span>シート</span><b>${S.no}／${S.conf.n}</b></div><div class="mini"><span>残り</span><b>${S.remain}錠</b></div></div>
-      <p class="note" style="margin-top:10px">診察期間　${F(WS[0].from)} 〜 ${F(WS[0].to)}<br>最終服薬日は ${F(S.last)}（${wd(S.last)}）の見込みです。</p>
+      <div class="summary">${mini1}${mini2}</div>
+      <p class="note" style="margin-top:10px">診察期間　${F(cur.from)} 〜 ${F(cur.to)}<br>${note}</p>
       <p style="margin:9px 0 0;font-size:13px">診察予定　${ex}</p>
       <div style="margin-top:10px;padding-top:9px;border-top:1px solid var(--line)">${fut}<p class="note" style="margin-top:4px">次の3シート以降の診察期間です。</p></div>
     </div>`})()}
