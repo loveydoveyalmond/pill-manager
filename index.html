@@ -58,15 +58,9 @@ function latestMedDate(){let ds=Object.keys(s.e).filter(x=>E(x).med).sort();retu
 function currentMedStart(){let last=latestMedDate();if(!last)return null;let d=P(last);while(E(I(A(d,-1))).med)d=A(d,-1);return I(d)}
 function plannedRestStart(){
   const today=I(T());
-  // 3日連続出血が今日で成立 → 明日から休薬
-  if(bleedRun(today)>=3)return I(A(T(),1));
-  // 直近の服薬日を基準に120日目の翌日を予定休薬開始日とする
-  const start=currentMedStart();
-  if(!start)return null;
-  const day=medRun(latestMedDate());
-  const last=latestMedDate();
-  if(day>=+s.max)return I(A(P(last),1));
-  return I(A(P(start),+s.max));
+  if(bleedRun(today)>=3)return I(A(T(),1));       // ③ 出血3日連続 → 明日から
+  try{const st=sheetState();if(st.resting)return null;if(st.restPredict)return st.restPredict}catch(e){}
+  return null;
 }
 function projectedRestDates(){
   const start=plannedRestStart();if(!start)return new Set();
@@ -104,40 +98,46 @@ function autoRest(){
 /* ===== シート（24日／3シート）と診察のめやす ===== */
 /* ===== シート進行：24錠で1シート、3シートで1サイクル、飲み終えたら4日休薬 ===== */
 function sheetTimeline(asOf){
-  const conf={days:+s.sheetDays||24,n:+s.sheets||3,rest:+s.rest||4,base:+s.sheetBase||1,start:(okDate(s.sheetStart)?s.sheetStart:'2026-10-08')};
-  let cur=P(conf.start), horizon=P(I(A(P(asOf||I(T())),420)));
-  let N=0, dayMap={}, sheets=[], guard=0;
-  while(cur<=horizon && guard<4000){
-    // --- 1シート＝24錠。記録で休薬の日は錠数を進めない ---
-    let inSheet=0;
-    while(inSheet<conf.days && guard<4000){
-      guard++;
-      const d=I(cur), rec=E(d);
-      if(rec.rest){ dayMap[d]={type:'rest'}; cur=A(cur,1); continue; }
-      N++; inSheet++;
-      const sidx=Math.floor((N-1)/conf.days), label=((conf.base-1+sidx)%conf.n)+1;
-      dayMap[d]={type:'pill',N:N,sidx:sidx,label:label,pill:((N-1)%conf.days)+1};
-      if(!sheets[sidx])sheets[sidx]={sidx:sidx,label:label,first:d,last:d};
-      sheets[sidx].last=d;
-      cur=A(cur,1);
-    }
-    // --- シートを飲み終えたら自動で4日休薬（記録で服薬になっていれば次シートへ） ---
-    let r=0;
-    while(r<conf.rest && guard<4000){
-      guard++;
-      const d=I(cur), rec=E(d);
-      if(rec.med) break;
-      if(!dayMap[d]) dayMap[d]={type:'rest'};
-      r++; cur=A(cur,1);
-    }
+  const conf={days:+s.sheetDays||24,n:+s.sheets||3,base:+s.sheetBase||1,start:(okDate(s.sheetStart)?s.sheetStart:'2026-10-08')};
+  let cur=P(conf.start), horizon=P(I(A(P(asOf||I(T())),430)));
+  let N=0, dayMap={}, sheets={}, nDate={}, lastD=null, lastN=0, guard=0;
+  // シート終わりに休薬は入れない。休薬は「3日連続出血」「連続服薬120日」「手動」で記録された日だけ。
+  while(cur<=horizon && guard<30000){
+    guard++;
+    const d=I(cur), rec=E(d);
+    if(rec.rest){ dayMap[d]={type:'rest'}; cur=A(cur,1); continue; }
+    N++;
+    const sidx=Math.floor((N-1)/conf.days), label=((conf.base-1+sidx)%conf.n)+1;
+    dayMap[d]={type:'pill',N:N,sidx:sidx,label:label,pill:((N-1)%conf.days)+1};
+    nDate[d]=N; lastD=d; lastN=N;
+    if(!sheets[sidx])sheets[sidx]={sidx:sidx,label:label,first:d,last:d};
+    sheets[sidx].last=d;
+    cur=A(cur,1);
   }
-  // --- 3シートで1サイクル（ラベルnのシートで区切る） ---
-  let course=0;
-  for(const sh of sheets){ if(!sh)continue; sh.course=course; if(sh.label===conf.n) course++; }
-  for(const d of Object.keys(dayMap)){ const m=dayMap[d]; if(m.type==='pill'&&sheets[m.sidx]) m.course=sheets[m.sidx].course; }
-  const cycles=[];
-  for(const sh of sheets){ if(!sh)continue; cycles[sh.course]={from:I(A(P(sh.last),-(Math.min(10,conf.days)-1))),to:sh.last}; }
-  return {conf:conf,sheets:sheets,dayMap:dayMap,cycles:cycles};
+  // --- 3シート（1→2→3）で1サイクル。3シート目の最終日で区切る ---
+  const keys=Object.keys(sheets).map(Number).sort((a,b)=>a-b);
+  let course=0, cycles=[];
+  for(const k of keys){
+    const sh=sheets[k]; sh.course=course;
+    cycles[course]={from:I(A(P(sh.last),-(Math.min(10,conf.days)-1))),to:sh.last};
+    if(sh.label===conf.n)course++;
+  }
+  for(const d of Object.keys(dayMap)){
+    const m=dayMap[d];
+    if(m.type==='pill'&&sheets[m.sidx])m.course=sheets[m.sidx].course;
+    else if(m.type==='rest'){ for(let i=1;i<60;i++){const pm=dayMap[I(A(P(d),-i))];if(pm&&pm.type==='pill'){m.course=sheets[pm.sidx]?sheets[pm.sidx].course:0;break}} }
+  }
+  const maxN=+s.max||120;
+  let restPredict=null;
+  if(nDate[lastD]===maxN)restPredict=null;
+  for(const d in nDate){ if(nDate[d]===maxN){restPredict=null;break} }
+  { // 120錠目にあたる日を探す（無ければ最終日から逆算）
+    let hit=null;
+    for(const d in nDate){ if(nDate[d]===maxN){hit=d;break} }
+    if(hit)restPredict=hit;
+    else if(lastD&&lastN<maxN)restPredict=I(A(P(lastD),maxN-lastN));
+  }
+  return {conf:conf,sheets:sheets,dayMap:dayMap,cycles:cycles,nDate:nDate,restPredict:restPredict,lastD:lastD,lastN:lastN};
 }
 function sheetState(asOf){
   const TL=sheetTimeline(asOf), conf=TL.conf;
@@ -149,17 +149,20 @@ function sheetState(asOf){
   let nxt=null,d=A(P(today),1);
   for(let i=0;i<60;i++){ const m=TL.dayMap[I(d)]; if(m&&m.type==='pill'){nxt={date:I(d),m:m};break} d=A(d,1) }
   const sidx=(e.sidx!=null)?e.sidx:0;
-  const sh=TL.sheets[sidx]||TL.sheets[0]||{label:conf.base,last:conf.start,course:0};
+  const sh=TL.sheets[sidx]||{label:conf.base,last:conf.start,course:0};
   const pill=resting?conf.days:(e.pill||conf.days);
   return {conf:conf,resting:resting,restDay:restDay,
     sheet:(e.label!=null?e.label:sh.label),pill:pill,remain:Math.max(0,conf.days-pill),
     last:sh.last,course:(e.course!=null?e.course:sh.course),cycles:TL.cycles,
     nextDate:nxt?nxt.date:null,nextSheet:nxt?nxt.m.label:null,nextPillNo:nxt?nxt.m.pill:null,
-    exam:(okDate(s.exam)?s.exam:'')};
+    restPredict:TL.restPredict,exam:(okDate(s.exam)?s.exam:'')};
 }
 function examWindows(){
-  const TL=sheetTimeline();
-  return Object.keys(TL.cycles).map(Number).sort((a,b)=>a-b).map(k=>({k:k,from:TL.cycles[k].from,to:TL.cycles[k].to}));
+  const TL=sheetTimeline(), out=[];
+  for(const k of Object.keys(TL.cycles).map(Number).sort((a,b)=>a-b)){
+    const c=TL.cycles[k]; if(c&&c.from&&c.to)out.push({k:k,from:c.from,to:c.to});
+  }
+  return out;
 }
 function weekdayOnOrBefore(x){let d=P(x);while([0,6].includes(d.getDay()))d=A(d,-1);return I(d)}
 const W=['日','月','火','水','木','金','土'];
@@ -249,7 +252,7 @@ function closeM(){document.querySelector('#modal').innerHTML=''}
 function tog(x,k){let e=E(x);e[k]=!e[k];if(k==='med'&&e.med){e.rest=false;e.time=new Date().toISOString()}if(k==='rest'&&e.rest)e.med=false;set(x,e);autoRest();closeM();render()}
 function del(x){delete s.e[x];save();closeM();render()}
 function history(){let meds=Object.keys(s.e).filter(x=>E(x).med).sort(),groups=[],cur=null;for(const x of meds){if(!cur||I(A(P(cur.b),1))!==x){if(cur)groups.push(cur);cur={a:x,b:x}}else cur.b=x}if(cur)groups.push(cur);document.querySelector('#history').innerHTML=`<div class="card"><h3>サイクル履歴</h3><div class="list">${groups.length?groups.map((c,i)=>{let rs=Object.keys(s.e).filter(x=>E(x).rest&&x>=I(A(P(c.b),1))).sort();let r1=rs[0],r2=r1?rs[Math.min(+s.rest-1,rs.length-1)]:null;return `<div class="cycle"><b>第${i+1}サイクル</b><p>服薬：${F(c.a)}〜${F(c.b)}（${Math.floor((P(c.b)-P(c.a))/86400000)+1}日）</p><p>休薬：${r1?F(r1)+'〜'+F(r2):'—'}</p></div>`}).join(''):'<p class="note">服薬記録がまだありません。</p>'}</div></div>`}
-function settings(){document.querySelector('#settings').innerHTML=`<div class="card"><h3>設定</h3><h4 style="margin:20px 0 4px">判定ルール</h4><label>連続服薬の上限日数</label><input id="mx" type="number" min="1" max="365" value="${s.max}"><label>休薬日数</label><input id="rs" type="number" min="1" max="14" value="${s.rest}"><div class="rulebox"><p><b>① 連続服薬の上限</b><br>${s.max}日連続で服薬した場合、翌日から${s.rest}日間を休薬とします。</p><p><b>② 3日連続の出血</b><br>出血が3日連続した場合は、${s.max}日の上限よりもこちらを優先し、3日目の翌日から${s.rest}日間を休薬とします。</p><p><b>③ 手動休薬</b><br>ホームの「休薬」を押すと、今日から${s.rest}日間を休薬として記録します。</p></div><button class="btn p" style="margin-top:16px;width:100%" onclick="saveSet()">設定を保存</button><p class="note">初期値：連続服薬120日／休薬4日。データは端末のLocalStorageに保存されます。保存状態：${store.ok?'OK':'保存不可（プライベートブラウズ等）'}／記録日数：${Object.keys(s.e).length}日。</p></div><div class="card"><h3>シート管理</h3><p class="note" style="margin-top:0">いま飲んでいるシートの情報です。ここを直すと、ホームの「診察のめやす」とカレンダーの診察期間が計算し直されます。</p>
+function settings(){document.querySelector('#settings').innerHTML=`<div class="card"><h3>設定</h3><h4 style="margin:20px 0 4px">判定ルール</h4><label>連続服薬の上限日数</label><input id="mx" type="number" min="1" max="365" value="${s.max}"><label>休薬日数</label><input id="rs" type="number" min="1" max="14" value="${s.rest}"><div class="rulebox"><p><b>① 連続服薬の上限</b><br>${s.max}日連続で服薬した場合、翌日から${s.rest}日間を休薬とします。</p><p><b>② 3日連続の出血</b><br>出血が3日連続した場合は、${s.max}日の上限よりもこちらを優先し、3日目の翌日から${s.rest}日間を休薬とします。</p><p><b>③ 手動休薬</b><br>ホームの「休薬」を押すと、今日から${s.rest}日間を休薬として記録します。</p></div><button class="btn p" style="margin-top:16px;width:100%" onclick="saveSet()">設定を保存</button><p class="note">初期値：連続服薬120日／休薬4日。データは端末のLocalStorageに保存されます。保存状態：${store.ok?'OK':'保存不可（プライベートブラウズ等）'}／記録日数：${Object.keys(s.e).length}日。</p></div><div class="card"><h3>シート管理</h3><p class="note" style="margin-top:0">いま飲んでいるシートの情報です。ここを直すと、ホームの「診察のめやす」とカレンダーの診察期間が計算し直されます。<br>シートを飲み終えても自動では休薬しません（続けて次のシートに進みます）。休薬が入るのは<b>3日連続の出血・連続服薬120日・手動（ホームの「休薬」またはカレンダーの日付）</b>のときだけです。</p>
 <label>このシートの飲み始めた日</label><input id="shs" type="date" value="${s.sheetStart||''}">
 <div class="row"><div style="flex:1"><label>1シートの錠数</label><input id="sd" type="number" min="1" max="90" value="${s.sheetDays||24}"></div><div style="flex:1"><label>処方シート数</label><input id="shn" type="number" min="1" max="12" value="${s.sheets||3}"></div></div>
 <label>このシートは何シート目か</label><input id="shb" type="number" min="1" max="12" value="${s.sheetBase||3}">
