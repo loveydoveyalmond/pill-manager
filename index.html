@@ -53,18 +53,6 @@ if(typeof navigator!=='undefined'&&typeof navigator.sendBeacon==='function'){
 let cm=new Date();cm.setDate(1);
 const I=isoOf,T=()=>{let d=new Date();d.setHours(0,0,0,0);return d},P=x=>new Date(x+'T00:00:00'),A=(d,n)=>{let x=new Date(d);x.setDate(x.getDate()+n);return x},F=(()=>{const f=new Intl.DateTimeFormat('ja-JP',{year:'numeric',month:'numeric',day:'numeric'});return x=>{const d=(x instanceof Date)?x:P(x);if(!d||isNaN(d.getTime()))return '—';try{return f.format(d)}catch(e){return '—'}}})(),E=x=>s.e[x]||{},save=()=>store.set(K,JSON.stringify(s));
 function set(x,v){let next={...E(x),...v};if(!Object.values(next).some(Boolean))delete s.e[x];else s.e[x]=next;save()}
-function doseStreak(asOf){
-  // asOf から遡って「服薬した日」を数える。休薬日は数えずに飛ばす。記録のない日で打ち切り。
-  let n=0,d=P(asOf);
-  for(let i=0;i<400;i++){
-    const m=E(I(d));
-    if(m.med)n++;
-    else if(m.rest){}
-    else break;
-    d=A(d,-1);
-  }
-  return n;
-}
 function medRun(x){let n=0,d=P(x);while(E(I(d)).med){n++;d=A(d,-1)}return n}
 function bleedRun(x){let n=0,d=P(x);while(E(I(d)).bleed){n++;d=A(d,-1)}return n}
 function restRun(x){let n=0,d=P(x);while(E(I(d)).rest){n++;d=A(d,-1)}return n}
@@ -237,8 +225,9 @@ function bleed(){
 function home(){
   const S=sheetState(), e=E(I(T())), x=I(T());
   const maxD=+s.max||120, restD=+s.rest||4;
-  // 連続服薬日数（休薬日は数えない）。今日まだ飲んでいなければ、昨日までの連続日数。
-  const n=S.resting?0:doseStreak(e.med?x:I(A(T(),-1)));
+  // 直前の休薬が明けた服薬開始日（＝サイクル開始日）から今日までの服薬日数。休薬日は数えない。
+  // 今日まだ飲んでいなければ今日は加算しない。
+  const n=Math.max(0, S.cycleDoses - (S.resting?S.cycleDoses:(e.med?0:1)));
   const pct=Math.min(100,n/maxD*100);
   const b=[0,1,2].filter(i=>E(I(A(T(),-i))).bleed).length;
   const ps=S.nextRest||plannedRestStart();
