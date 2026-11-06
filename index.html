@@ -53,6 +53,18 @@ if(typeof navigator!=='undefined'&&typeof navigator.sendBeacon==='function'){
 let cm=new Date();cm.setDate(1);
 const I=isoOf,T=()=>{let d=new Date();d.setHours(0,0,0,0);return d},P=x=>new Date(x+'T00:00:00'),A=(d,n)=>{let x=new Date(d);x.setDate(x.getDate()+n);return x},F=(()=>{const f=new Intl.DateTimeFormat('ja-JP',{year:'numeric',month:'numeric',day:'numeric'});return x=>{const d=(x instanceof Date)?x:P(x);if(!d||isNaN(d.getTime()))return '—';try{return f.format(d)}catch(e){return '—'}}})(),E=x=>s.e[x]||{},save=()=>store.set(K,JSON.stringify(s));
 function set(x,v){let next={...E(x),...v};if(!Object.values(next).some(Boolean))delete s.e[x];else s.e[x]=next;save()}
+function doseStreak(asOf){
+  // asOf から遡って「服薬した日」を数える。休薬日は数えずに飛ばす。記録のない日で打ち切り。
+  let n=0,d=P(asOf);
+  for(let i=0;i<400;i++){
+    const m=E(I(d));
+    if(m.med)n++;
+    else if(m.rest){}
+    else break;
+    d=A(d,-1);
+  }
+  return n;
+}
 function medRun(x){let n=0,d=P(x);while(E(I(d)).med){n++;d=A(d,-1)}return n}
 function bleedRun(x){let n=0,d=P(x);while(E(I(d)).bleed){n++;d=A(d,-1)}return n}
 function restRun(x){let n=0,d=P(x);while(E(I(d)).rest){n++;d=A(d,-1)}return n}
@@ -225,8 +237,8 @@ function bleed(){
 function home(){
   const S=sheetState(), e=E(I(T())), x=I(T());
   const maxD=+s.max||120, restD=+s.rest||4;
-  // 服薬した日数（休薬日は数えない）。今日まだ飲んでいなければ今日は数えない。
-  const n=Math.max(0, S.cycleDoses-(e.med?0:1));
+  // 連続服薬日数（休薬日は数えない）。今日まだ飲んでいなければ、昨日までの連続日数。
+  const n=S.resting?0:doseStreak(e.med?x:I(A(T(),-1)));
   const pct=Math.min(100,n/maxD*100);
   const b=[0,1,2].filter(i=>E(I(A(T(),-i))).bleed).length;
   const ps=S.nextRest||plannedRestStart();
@@ -234,9 +246,12 @@ function home(){
   if(S.resting) next=`休薬中（あと${Math.max(0,restD-S.restDay)}日）`;
   else if(ps) next=`${F(ps)}から${restD}日`;
   else next=`—`;
-  const head=S.resting?'現在は休薬期間':(e.med?'現在は服薬期間':'未服薬');
+  // 上段の小さい文字：服用済みなら「本日服薬済み」、まだなら「◯日服薬継続中」
+  const head=S.resting?'現在は休薬期間':(e.med?'本日服薬済み':(n>0?`${n}日服薬継続中`:'服薬記録がありません'));
+  // 大見出し：今日まだ飲んでいなければ「未服薬」、飲んでいれば「◯日目」
+  const big=S.resting?`休薬 ${S.restDay}日目`:(e.med?`${n}日目`:'未服薬');
   document.querySelector('#home').innerHTML=`
-  <div class="card status"><div class="small">${head}</div><div class="big">${S.resting?`休薬 ${S.restDay}日目`:`${n}日目`}</div><div class="small">${F(x)}</div><div class="bar"><i style="width:${pct}%"></i></div><div class="note">${S.resting?`あと${Math.max(0,restD-S.restDay)}日で服薬再開`:`上限 ${maxD}日まであと${Math.max(0,maxD-n)}日`}</div></div>
+  <div class="card status"><div class="small">${head}</div><div class="big">${big}</div><div class="small">${F(x)}</div><div class="bar"><i style="width:${pct}%"></i></div><div class="note">${S.resting?`あと${Math.max(0,restD-S.restDay)}日で服薬再開`:`上限 ${maxD}日まであと${Math.max(0,maxD-n)}日`}</div></div>
   <div class="card"><div class="row"><button class="btn b" onclick="take()">💊 服薬${e.med?' ✓':''}</button><button class="btn g" onclick="manualRest()">🌱 休薬</button><button class="btn r" onclick="bleed()">🌷 出血${e.bleed?' ✓':''}</button></div><div class="note" style="margin-top:9px">${e.time?'服薬時刻：'+(isNaN(new Date(e.time).getTime())?'—':new Date(e.time).toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'})):'「服薬」を押すと、今日の服薬としてすぐに記録されます。'}</div></div>
 
   <div class="card"><div class="summary"><div class="mini"><span>次の休薬予定</span><b>${next}</b></div><div class="mini"><span>過去3日間の出血</span><b>${b}日</b></div></div>${ps?`<p class="note" style="margin-top:10px">📅 カレンダーでは、次の休薬${F(ps)}〜${F(I(A(P(ps),+s.rest-1)))}を予定として表示しています。</p>`:''}</div>
