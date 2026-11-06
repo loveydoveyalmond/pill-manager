@@ -225,7 +225,8 @@ function bleed(){
 function home(){
   const S=sheetState(), e=E(I(T())), x=I(T());
   const maxD=+s.max||120, restD=+s.rest||4;
-  const n=S.cycleDoses;                 // ① サイクル内の服薬日数（休薬日は数えない）
+  // 服薬した日数（休薬日は数えない）。今日まだ飲んでいなければ今日は数えない。
+  const n=Math.max(0, S.cycleDoses-(e.med?0:1));
   const pct=Math.min(100,n/maxD*100);
   const b=[0,1,2].filter(i=>E(I(A(T(),-i))).bleed).length;
   const ps=S.nextRest||plannedRestStart();
@@ -233,14 +234,9 @@ function home(){
   if(S.resting) next=`休薬中（あと${Math.max(0,restD-S.restDay)}日）`;
   else if(ps) next=`${F(ps)}から${restD}日`;
   else next=`—`;
+  const head=S.resting?'現在は休薬期間':(e.med?'現在は服薬期間':'未服薬');
   document.querySelector('#home').innerHTML=`
-  <div class="card status">
-    <div class="small">${S.resting?'現在は休薬期間':'現在は服薬期間'}</div>
-    <div class="big">${S.resting?`休薬 ${S.restDay}日目`:`第${S.cycleNo}サイクル ${n}日目`}</div>
-    <div class="small">${F(x)}（${S.sheet}シート目・${S.pill}錠目${S.resting?'まで服用':''}）</div>
-    <div class="bar"><i style="width:${pct}%"></i></div>
-    <div class="note">${S.resting?`あと${Math.max(0,restD-S.restDay)}日で服薬再開`:`このサイクルは上限${maxD}日まであと${Math.max(0,maxD-n)}日`}</div>
-  </div>
+  <div class="card status"><div class="small">${head}</div><div class="big">${S.resting?`休薬 ${S.restDay}日目`:`${n}日目`}</div><div class="small">${F(x)}</div><div class="bar"><i style="width:${pct}%"></i></div><div class="note">${S.resting?`あと${Math.max(0,restD-S.restDay)}日で服薬再開`:`上限 ${maxD}日まであと${Math.max(0,maxD-n)}日`}</div></div>
   <div class="card"><div class="row"><button class="btn b" onclick="take()">💊 服薬${e.med?' ✓':''}</button><button class="btn g" onclick="manualRest()">🌱 休薬</button><button class="btn r" onclick="bleed()">🌷 出血${e.bleed?' ✓':''}</button></div><div class="note" style="margin-top:9px">${e.time?'服薬時刻：'+(isNaN(new Date(e.time).getTime())?'—':new Date(e.time).toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'})):'「服薬」を押すと、今日の服薬としてすぐに記録されます。'}</div></div>
 
   <div class="card"><div class="summary"><div class="mini"><span>次の休薬予定</span><b>${next}</b></div><div class="mini"><span>過去3日間の出血</span><b>${b}日</b></div></div>${ps?`<p class="note" style="margin-top:10px">📅 カレンダーでは、次の休薬${F(ps)}〜${F(I(A(P(ps),+s.rest-1)))}を予定として表示しています。</p>`:''}</div>
